@@ -1,0 +1,77 @@
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { QUIZ_QUESTIONS } from '../lib/quiz';
+import { classifyDesignType } from '../lib/designTypes';
+import { theme } from '../lib/theme';
+import { Profile } from '../lib/types';
+
+export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: Profile) => void }) {
+  const insets = useSafeAreaInsets();
+  const [index, setIndex] = useState(0);
+  const [orderScore, setOrderScore] = useState(0);
+  const [intensityScore, setIntensityScore] = useState(0);
+
+  const question = QUIZ_QUESTIONS[index];
+  const isLast = index === QUIZ_QUESTIONS.length - 1;
+
+  function pick(order: number, intensity: number) {
+    const nextOrder = orderScore + order;
+    const nextIntensity = intensityScore + intensity;
+    if (isLast) {
+      const designTypeId = classifyDesignType(nextOrder, nextIntensity);
+      onComplete({
+        designTypeId,
+        orderScore: nextOrder,
+        intensityScore: nextIntensity,
+        completedAt: new Date().toISOString(),
+      });
+      return;
+    }
+    setOrderScore(nextOrder);
+    setIntensityScore(nextIntensity);
+    setIndex((i) => i + 1);
+  }
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <Text style={styles.progress}>
+        {index + 1} / {QUIZ_QUESTIONS.length}
+      </Text>
+      <Text style={styles.prompt}>{question.prompt}</Text>
+      <View style={styles.options}>
+        {question.options.map((opt, i) => (
+          <Pressable
+            key={i}
+            style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
+            onPress={() => pick(opt.order, opt.intensity)}
+          >
+            <Text style={styles.optionText}>{opt.text}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24, justifyContent: 'space-between' },
+  progress: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
+  prompt: {
+    color: theme.fg,
+    fontFamily: theme.displayFont,
+    fontSize: 28,
+    lineHeight: 36,
+    marginTop: 24,
+  },
+  options: { gap: 12, marginTop: 32 },
+  option: {
+    borderWidth: 1,
+    borderColor: theme.border,
+    borderRadius: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  optionPressed: { backgroundColor: theme.bgAlt, borderColor: theme.fg },
+  optionText: { color: theme.fg, fontSize: 15, lineHeight: 21 },
+});
