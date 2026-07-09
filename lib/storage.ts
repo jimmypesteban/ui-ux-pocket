@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameStats, Profile } from './types';
+import { GameLogEntry, GameStats, Profile } from './types';
 
 const PROFILE_KEY = 'ui-ux-pocket:profile';
 const STATS_KEY = 'ui-ux-pocket:stats';
@@ -24,6 +24,7 @@ const DEFAULT_STATS: GameStats = {
   totalCorrect: 0,
   lastPlayedDate: null,
   playedChallengeIds: [],
+  history: [],
 };
 
 export async function loadStats(): Promise<GameStats> {
@@ -33,4 +34,69 @@ export async function loadStats(): Promise<GameStats> {
 
 export async function saveStats(stats: GameStats): Promise<void> {
   await AsyncStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+
+async function loadBest(key: string): Promise<number | null> {
+  const raw = await AsyncStorage.getItem(key);
+  return raw ? Number(raw) : null;
+}
+
+async function saveBest(key: string, score: number): Promise<void> {
+  await AsyncStorage.setItem(key, String(score));
+}
+
+export const loadColorBest = () => loadBest('ui-ux-pocket:colorBest');
+export const saveColorBest = (score: number) => saveBest('ui-ux-pocket:colorBest', score);
+
+export const loadContrastBest = () => loadBest('ui-ux-pocket:contrastBest');
+export const saveContrastBest = (score: number) => saveBest('ui-ux-pocket:contrastBest', score);
+
+export const loadAlignmentBest = () => loadBest('ui-ux-pocket:alignmentBest');
+export const saveAlignmentBest = (score: number) => saveBest('ui-ux-pocket:alignmentBest', score);
+
+export const loadKerningBest = () => loadBest('ui-ux-pocket:kerningBest');
+export const saveKerningBest = (score: number) => saveBest('ui-ux-pocket:kerningBest', score);
+
+export const loadPixelMatchBest = () => loadBest('ui-ux-pocket:pixelMatchBest');
+export const savePixelMatchBest = (score: number) => saveBest('ui-ux-pocket:pixelMatchBest', score);
+
+export const loadCenterBest = () => loadBest('ui-ux-pocket:centerBest');
+export const saveCenterBest = (score: number) => saveBest('ui-ux-pocket:centerBest', score);
+
+export const loadTypeOrderBest = () => loadBest('ui-ux-pocket:typeOrderBest');
+export const saveTypeOrderBest = (score: number) => saveBest('ui-ux-pocket:typeOrderBest', score);
+
+const REMINDER_HOUR_KEY = 'ui-ux-pocket:reminderHour';
+const NOTIFICATIONS_ENABLED_KEY = 'ui-ux-pocket:notificationsEnabled';
+
+export async function loadReminderHour(): Promise<number> {
+  const raw = await AsyncStorage.getItem(REMINDER_HOUR_KEY);
+  return raw ? Number(raw) : 9;
+}
+
+export async function saveReminderHour(hour: number): Promise<void> {
+  await AsyncStorage.setItem(REMINDER_HOUR_KEY, String(hour));
+}
+
+export async function loadNotificationsEnabled(): Promise<boolean> {
+  const raw = await AsyncStorage.getItem(NOTIFICATIONS_ENABLED_KEY);
+  return raw === null ? true : raw === 'true';
+}
+
+export async function saveNotificationsEnabled(enabled: boolean): Promise<void> {
+  await AsyncStorage.setItem(NOTIFICATIONS_ENABLED_KEY, String(enabled));
+}
+
+const GAME_LOG_KEY = 'ui-ux-pocket:gameLog';
+
+export async function loadGameLog(): Promise<GameLogEntry[]> {
+  const raw = await AsyncStorage.getItem(GAME_LOG_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export async function appendGameLogEntry(entry: GameLogEntry): Promise<GameLogEntry[]> {
+  const current = await loadGameLog();
+  const updated = [...current, entry].slice(-200);
+  await AsyncStorage.setItem(GAME_LOG_KEY, JSON.stringify(updated));
+  return updated;
 }

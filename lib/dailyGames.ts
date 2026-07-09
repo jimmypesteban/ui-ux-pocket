@@ -3,6 +3,7 @@ import { JudgmentChallenge } from './types';
 export const CHALLENGES: JudgmentChallenge[] = [
   {
     id: 'tap-target',
+    category: 'tap-targets',
     prompt: 'Which button is actually tappable on a real thumb?',
     optionA: { label: 'Submit', padding: 6, gap: 0, fontSize: 13, fgColor: '#000', bgColor: '#fff', align: 'center' },
     optionB: { label: 'Submit', padding: 16, gap: 0, fontSize: 16, fgColor: '#000', bgColor: '#fff', align: 'center' },
@@ -12,6 +13,7 @@ export const CHALLENGES: JudgmentChallenge[] = [
   },
   {
     id: 'contrast-check',
+    category: 'contrast',
     prompt: 'Which text will your users actually be able to read?',
     optionA: { label: 'Continue', padding: 12, gap: 0, fontSize: 15, fgColor: '#555555', bgColor: '#000000', align: 'center' },
     optionB: { label: 'Continue', padding: 12, gap: 0, fontSize: 15, fgColor: '#ffffff', bgColor: '#000000', align: 'center' },
@@ -21,6 +23,7 @@ export const CHALLENGES: JudgmentChallenge[] = [
   },
   {
     id: 'breathing-room',
+    category: 'spacing',
     prompt: 'Which card gives its content room to exist?',
     optionA: { label: 'Order summary', padding: 4, gap: 0, fontSize: 14, fgColor: '#fff', bgColor: '#111', align: 'flex-start' },
     optionB: { label: 'Order summary', padding: 24, gap: 0, fontSize: 14, fgColor: '#fff', bgColor: '#111', align: 'flex-start' },
@@ -30,6 +33,7 @@ export const CHALLENGES: JudgmentChallenge[] = [
   },
   {
     id: 'min-font',
+    category: 'hierarchy',
     prompt: 'Which label survives being read on an actual phone, outdoors, by someone over 40?',
     optionA: { label: 'Terms & Conditions', padding: 10, gap: 0, fontSize: 9, fgColor: '#fff', bgColor: '#000', align: 'center' },
     optionB: { label: 'Terms & Conditions', padding: 10, gap: 0, fontSize: 15, fgColor: '#fff', bgColor: '#000', align: 'center' },
@@ -39,6 +43,7 @@ export const CHALLENGES: JudgmentChallenge[] = [
   },
   {
     id: 'scan-align',
+    category: 'spacing',
     prompt: 'Which layout is easier to scan down a list?',
     optionA: { label: 'Item name', padding: 12, gap: 0, fontSize: 14, fgColor: '#fff', bgColor: '#111', align: 'center' },
     optionB: { label: 'Item name', padding: 12, gap: 0, fontSize: 14, fgColor: '#fff', bgColor: '#111', align: 'flex-start' },
@@ -48,6 +53,7 @@ export const CHALLENGES: JudgmentChallenge[] = [
   },
   {
     id: 'button-spacing',
+    category: 'spacing',
     prompt: 'Which pair of adjacent buttons avoids rage-taps?',
     optionA: { label: 'Delete · Cancel', padding: 10, gap: 2, fontSize: 14, fgColor: '#fff', bgColor: '#000', align: 'center' },
     optionB: { label: 'Delete · Cancel', padding: 10, gap: 20, fontSize: 14, fgColor: '#fff', bgColor: '#000', align: 'center' },
@@ -57,6 +63,7 @@ export const CHALLENGES: JudgmentChallenge[] = [
   },
   {
     id: 'hierarchy-size',
+    category: 'hierarchy',
     prompt: 'Which heading actually reads as a heading?',
     optionA: { label: 'Account Settings', padding: 12, gap: 0, fontSize: 15, fgColor: '#fff', bgColor: '#000', align: 'flex-start' },
     optionB: { label: 'Account Settings', padding: 12, gap: 0, fontSize: 24, fgColor: '#fff', bgColor: '#000', align: 'flex-start' },
@@ -66,6 +73,7 @@ export const CHALLENGES: JudgmentChallenge[] = [
   },
   {
     id: 'faint-cta',
+    category: 'contrast',
     prompt: 'Which call-to-action will people actually notice?',
     optionA: { label: 'Get Started', padding: 14, gap: 0, fontSize: 15, fgColor: '#666', bgColor: '#111', align: 'center' },
     optionB: { label: 'Get Started', padding: 14, gap: 0, fontSize: 15, fgColor: '#000', bgColor: '#fff', align: 'center' },

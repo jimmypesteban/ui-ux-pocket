@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { OptionSpec } from '../lib/types';
-import { theme } from '../lib/theme';
+import { Theme, useTheme } from '../lib/theme';
 
 export default function JudgmentOption({
   spec,
@@ -19,6 +19,8 @@ export default function JudgmentOption({
   isChosen: boolean;
   revealed: boolean;
 }) {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   return (
     <Pressable
       onPress={onPress}
@@ -49,25 +51,27 @@ export default function JudgmentOption({
   );
 }
 
-const styles = StyleSheet.create({
-  frame: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: theme.border,
-    borderRadius: 4,
-    padding: 12,
-    gap: 10,
-  },
-  frameCorrect: { borderColor: theme.success },
-  frameWrong: { borderColor: theme.danger },
-  letter: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
-  mockStage: {
-    backgroundColor: theme.bgAlt,
-    borderRadius: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 70,
-  },
-  badge: { color: theme.success, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
-  badgeWrong: { color: theme.danger, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
-});
+function makeStyles(theme: Theme) {
+  return StyleSheet.create({
+    frame: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 4,
+      padding: 12,
+      gap: 10,
+    },
+    frameCorrect: { borderColor: theme.success },
+    frameWrong: { borderColor: theme.danger },
+    letter: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
+    mockStage: {
+      backgroundColor: theme.bgAlt,
+      borderRadius: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 70,
+    },
+    badge: { color: theme.success, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
+    badgeWrong: { color: theme.danger, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
+  });
+}

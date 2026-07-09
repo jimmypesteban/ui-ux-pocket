@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { JudgmentChallenge } from '../lib/types';
-import { theme } from '../lib/theme';
+import { Theme, useTheme } from '../lib/theme';
 import JudgmentOption from '../components/JudgmentOption';
 
 export default function GameScreen({
@@ -11,10 +11,12 @@ export default function GameScreen({
   onBack,
 }: {
   challenge: JudgmentChallenge;
-  onFinish: (wasCorrect: boolean) => void;
+  onFinish: (chosen: 'A' | 'B', wasCorrect: boolean) => void;
   onBack: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const [chosen, setChosen] = useState<'A' | 'B' | null>(null);
 
   function choose(letter: 'A' | 'B') {
@@ -65,7 +67,7 @@ export default function GameScreen({
           <Text style={styles.explanation}>{challenge.explanation}</Text>
           <Pressable
             style={({ pressed }) => [styles.doneButton, pressed && styles.doneButtonPressed]}
-            onPress={() => onFinish(wasCorrect)}
+            onPress={() => chosen && onFinish(chosen, wasCorrect)}
           >
             <Text style={styles.doneButtonText}>DONE FOR TODAY</Text>
           </Pressable>
@@ -75,30 +77,32 @@ export default function GameScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-  back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
-  prompt: {
-    color: theme.fg,
-    fontFamily: theme.displayFont,
-    fontSize: 24,
-    lineHeight: 32,
-    marginBottom: 24,
-  },
-  optionsRow: { flexDirection: 'row', gap: 12 },
-  feedback: { marginTop: 32 },
-  verdict: { fontFamily: theme.displayFont, fontSize: 20, marginBottom: 12 },
-  verdictGood: { color: theme.success },
-  verdictBad: { color: theme.danger },
-  explanation: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
-  doneButton: {
-    borderWidth: 1,
-    borderColor: theme.fg,
-    borderRadius: 4,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 28,
-  },
-  doneButtonPressed: { opacity: 0.6 },
-  doneButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
-});
+function makeStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
+    back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
+    prompt: {
+      color: theme.fg,
+      fontFamily: theme.displayFont,
+      fontSize: 24,
+      lineHeight: 32,
+      marginBottom: 24,
+    },
+    optionsRow: { flexDirection: 'row', gap: 12 },
+    feedback: { marginTop: 32 },
+    verdict: { fontFamily: theme.displayFont, fontSize: 20, marginBottom: 12 },
+    verdictGood: { color: theme.success },
+    verdictBad: { color: theme.danger },
+    explanation: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
+    doneButton: {
+      borderWidth: 1,
+      borderColor: theme.fg,
+      borderRadius: 4,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginTop: 28,
+    },
+    doneButtonPressed: { opacity: 0.6 },
+    doneButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
+  });
+}

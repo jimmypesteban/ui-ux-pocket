@@ -3,33 +3,41 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QUIZ_QUESTIONS } from '../lib/quiz';
 import { classifyDesignType } from '../lib/designTypes';
-import { theme } from '../lib/theme';
+import { DEFAULT_AVATAR_ID } from '../lib/avatars';
+import { Theme, useTheme } from '../lib/theme';
 import { Profile } from '../lib/types';
 
 export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: Profile) => void }) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const [index, setIndex] = useState(0);
   const [orderScore, setOrderScore] = useState(0);
   const [intensityScore, setIntensityScore] = useState(0);
+  const [scopeScore, setScopeScore] = useState(0);
 
   const question = QUIZ_QUESTIONS[index];
   const isLast = index === QUIZ_QUESTIONS.length - 1;
 
-  function pick(order: number, intensity: number) {
+  function pick(order: number, intensity: number, scope: number) {
     const nextOrder = orderScore + order;
     const nextIntensity = intensityScore + intensity;
+    const nextScope = scopeScore + scope;
     if (isLast) {
-      const designTypeId = classifyDesignType(nextOrder, nextIntensity);
+      const designTypeId = classifyDesignType(nextOrder, nextIntensity, nextScope);
       onComplete({
         designTypeId,
         orderScore: nextOrder,
         intensityScore: nextIntensity,
+        scopeScore: nextScope,
+        avatarId: DEFAULT_AVATAR_ID,
         completedAt: new Date().toISOString(),
       });
       return;
     }
     setOrderScore(nextOrder);
     setIntensityScore(nextIntensity);
+    setScopeScore(nextScope);
     setIndex((i) => i + 1);
   }
 
@@ -44,7 +52,7 @@ export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: P
           <Pressable
             key={i}
             style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
-            onPress={() => pick(opt.order, opt.intensity)}
+            onPress={() => pick(opt.order, opt.intensity, opt.scope)}
           >
             <Text style={styles.optionText}>{opt.text}</Text>
           </Pressable>
@@ -54,24 +62,26 @@ export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: P
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24, justifyContent: 'space-between' },
-  progress: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
-  prompt: {
-    color: theme.fg,
-    fontFamily: theme.displayFont,
-    fontSize: 28,
-    lineHeight: 36,
-    marginTop: 24,
-  },
-  options: { gap: 12, marginTop: 32 },
-  option: {
-    borderWidth: 1,
-    borderColor: theme.border,
-    borderRadius: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  optionPressed: { backgroundColor: theme.bgAlt, borderColor: theme.fg },
-  optionText: { color: theme.fg, fontSize: 15, lineHeight: 21 },
-});
+function makeStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24, justifyContent: 'space-between' },
+    progress: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
+    prompt: {
+      color: theme.fg,
+      fontFamily: theme.displayFont,
+      fontSize: 28,
+      lineHeight: 36,
+      marginTop: 24,
+    },
+    options: { gap: 12, marginTop: 32 },
+    option: {
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 4,
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+    },
+    optionPressed: { backgroundColor: theme.bgAlt, borderColor: theme.fg },
+    optionText: { color: theme.fg, fontSize: 15, lineHeight: 21 },
+  });
+}
