@@ -1,8 +1,10 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import AnimatedBar from '../components/AnimatedBar';
 import { categoryBreakdown, gameLogBreakdown } from '../lib/gameLogic';
 import { GAME_LABELS, OTHER_GAME_ORDER } from '../lib/gameMeta';
 import { Theme, useTheme } from '../lib/theme';
 import { ChallengeCategory, GameLogEntry, GameStats } from '../lib/types';
+import { space } from '../lib/tokens';
 
 const CATEGORY_LABELS: Record<ChallengeCategory, string> = {
   contrast: 'CONTRAST',
@@ -24,7 +26,7 @@ export default function StatsScreen({ stats, gameLog }: { stats: GameStats; game
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingTop: 20, paddingBottom: 24 }}
+      contentContainerStyle={{ paddingTop: space.subScreenTop, paddingBottom: space.space24 }}
     >
       <Text style={styles.eyebrow}>OVERALL</Text>
       <View style={styles.overallRow}>
@@ -46,7 +48,7 @@ export default function StatsScreen({ stats, gameLog }: { stats: GameStats; game
               <Text style={styles.catValue}>{pct === null ? 'NO DATA' : `${pct}% (${correct}/${played})`}</Text>
             </View>
             <View style={styles.barTrack}>
-              <View style={[styles.barFill, { width: `${pct ?? 0}%` }]} />
+              <AnimatedBar pct={pct ?? 0} style={styles.barFill} />
             </View>
           </View>
         );
@@ -67,7 +69,7 @@ export default function StatsScreen({ stats, gameLog }: { stats: GameStats; game
               </Text>
             </View>
             <View style={styles.barTrack}>
-              <View style={[styles.barFill, { width: `${pct ?? 0}%` }]} />
+              <AnimatedBar pct={pct ?? 0} style={styles.barFill} />
             </View>
           </View>
         );
@@ -89,15 +91,15 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 16 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space16 },
     overallRow: { flexDirection: 'row', justifyContent: 'space-between' },
     stat: { alignItems: 'flex-start' },
     statValue: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26 },
-    statLabel: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1, marginTop: 4 },
-    divider: { height: 1, backgroundColor: theme.border, marginVertical: 28 },
-    catRow: { marginBottom: 20 },
-    catHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    statLabel: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1, marginTop: space.space4 },
+    divider: { height: 1, backgroundColor: theme.border, marginVertical: space.sectionGap },
+    catRow: { marginBottom: space.space20 },
+    catHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: space.space8 },
     catLabel: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
     catValue: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12 },
     barTrack: { height: 4, backgroundColor: theme.border, borderRadius: 2, overflow: 'hidden' },

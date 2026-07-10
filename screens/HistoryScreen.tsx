@@ -3,6 +3,7 @@ import { CHALLENGES } from '../lib/dailyGames';
 import { GAME_LABELS } from '../lib/gameMeta';
 import { Theme, useTheme } from '../lib/theme';
 import { GameLogEntry, GameStats } from '../lib/types';
+import { space, border } from '../lib/tokens';
 
 type CombinedEntry =
   | { kind: 'judgment'; date: string; challengeId: string; chosen: 'A' | 'B'; wasCorrect: boolean }
@@ -26,7 +27,7 @@ export default function HistoryScreen({ stats, gameLog }: { stats: GameStats; ga
     .map(({ entry }) => entry);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: 20, paddingBottom: 24 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: space.subScreenTop, paddingBottom: space.space24 }}>
       <Text style={styles.eyebrow}>PAST ATTEMPTS</Text>
 
       {combined.length === 0 && (
@@ -70,17 +71,17 @@ export default function HistoryScreen({ stats, gameLog }: { stats: GameStats; ga
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 20 },
-    empty: { color: theme.fgDim, fontSize: 15, lineHeight: 22, marginTop: 12 },
-    card: { borderTopWidth: 1, borderTopColor: theme.border, paddingVertical: 20 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space20 },
+    empty: { color: theme.fgDim, fontSize: 15, lineHeight: 22, marginTop: space.space12 },
+    card: { borderTopWidth: border.hairline, borderTopColor: theme.border, paddingVertical: space.space20 },
     rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     date: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
     verdict: { fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
     verdictGood: { color: theme.success },
     verdictBad: { color: theme.danger },
     score: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
-    prompt: { color: theme.fg, fontSize: 16, lineHeight: 22, marginTop: 10 },
-    meta: { color: theme.fgDim, fontSize: 13, marginTop: 8 },
+    prompt: { color: theme.fg, fontSize: 16, lineHeight: 22, marginTop: space.space10 },
+    meta: { color: theme.fgDim, fontSize: 13, marginTop: space.space8 },
   });
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
+import AnimatedPressable from '../components/AnimatedPressable';
 import {
   ContrastRound,
   generateContrastRound,
@@ -10,6 +11,7 @@ import {
 } from '../lib/contrastGame';
 import { hslToCss } from '../lib/colorGame';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 const ROUND_COUNT = 5;
 
@@ -56,7 +58,7 @@ export default function ContrastGameScreen({
 
   if (phase === 'intro') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
@@ -67,9 +69,9 @@ export default function ContrastGameScreen({
           color pairing actually is.
         </Text>
         {bestScore !== null && <Text style={styles.best}>Best score: {bestScore.toFixed(1)} / {ROUND_COUNT * 10}</Text>}
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+        <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
           <Text style={styles.primaryButtonText}>START</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -80,7 +82,7 @@ export default function ContrastGameScreen({
     }
     const round = rounds[roundIndex];
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>✕ Exit</Text>
         </Pressable>
@@ -93,9 +95,9 @@ export default function ContrastGameScreen({
 
         <ColorSlider label="RATIO GUESS" value={guess} min={1} max={21} onChange={setGuess} />
 
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={lockInGuess}>
+        <AnimatedPressable style={styles.primaryButton} onPress={lockInGuess}>
           <Text style={styles.primaryButtonText}>LOCK IN</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -104,7 +106,7 @@ export default function ContrastGameScreen({
   const max = rounds.length * 10;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
       <Text style={styles.eyebrow}>RESULTS</Text>
       <Text style={styles.scoreTotal}>{total.toFixed(1)} / {max}</Text>
       <Text style={styles.body}>{verdictForContrastScore(total, max)}</Text>
@@ -122,9 +124,9 @@ export default function ContrastGameScreen({
         ))}
       </View>
 
-      <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+      <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
         <Text style={styles.primaryButtonText}>PLAY AGAIN</Text>
-      </Pressable>
+      </AnimatedPressable>
       <Pressable onPress={onBack} style={styles.doneLink}>
         <Text style={styles.doneLinkText}>Done for now</Text>
       </Pressable>
@@ -134,39 +136,38 @@ export default function ContrastGameScreen({
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 8 },
-    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: 8, marginBottom: 16 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
+    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
-    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: 20 },
+    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     sample: {
       height: 140,
-      borderRadius: 4,
-      marginBottom: 24,
-      borderWidth: 1,
+      borderRadius: radius.card,
+      marginBottom: space.space24,
+      borderWidth: border.hairline,
       borderColor: theme.border,
       alignItems: 'center',
       justifyContent: 'center',
     },
     sampleText: { fontSize: 22, fontWeight: '600' },
     primaryButton: {
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.fg,
-      borderRadius: 4,
+      borderRadius: radius.card,
       paddingVertical: 18,
       alignItems: 'center',
-      marginTop: 12,
+      marginTop: space.space12,
     },
-    pressed: { opacity: 0.6 },
     primaryButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 14, letterSpacing: 1 },
-    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: 12 },
-    roundList: { marginTop: 28, gap: 12 },
-    roundRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    roundSwatch: { width: 48, height: 32, borderRadius: 4, borderWidth: 1, borderColor: theme.border, alignItems: 'center', justifyContent: 'center' },
+    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: space.space12 },
+    roundList: { marginTop: space.sectionGap, gap: space.space12 },
+    roundRow: { flexDirection: 'row', alignItems: 'center', gap: space.space12 },
+    roundSwatch: { width: 48, height: 32, borderRadius: radius.card, borderWidth: border.hairline, borderColor: theme.border, alignItems: 'center', justifyContent: 'center' },
     roundSwatchText: { fontSize: 13, fontWeight: '600' },
     roundScore: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12 },
-    doneLink: { marginTop: 16, alignItems: 'center' },
+    doneLink: { marginTop: space.space16, alignItems: 'center' },
     doneLinkText: { color: theme.fgFaint, fontSize: 13, textDecorationLine: 'underline' },
   });
 }

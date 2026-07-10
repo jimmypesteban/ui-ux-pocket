@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { generateTypeOrderRound, scoreRound, TypeOrderRound, verdictForTypeOrderScore } from '../lib/typeOrderGame';
+import AnimatedPressable from '../components/AnimatedPressable';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 const ROUND_COUNT = 5;
 
@@ -23,8 +25,10 @@ export default function TypeOrderGameScreen({
   const [phase, setPhase] = useState<Phase>('intro');
   const [rounds, setRounds] = useState<TypeOrderRound[]>([]);
   const [scores, setScores] = useState<number[]>([]);
+  const [details, setDetails] = useState<{ correct: boolean; elapsedMs: number }[]>([]);
   const [nextRank, setNextRank] = useState(0);
   const [flash, setFlash] = useState<{ pos: number; ok: boolean } | null>(null);
+  const [answeredPositions, setAnsweredPositions] = useState<number[]>([]);
   const roundStartRef = useRef(0);
 
   const roundIndex = scores.length;
@@ -34,12 +38,14 @@ export default function TypeOrderGameScreen({
       roundStartRef.current = Date.now();
       setNextRank(0);
       setFlash(null);
+      setAnsweredPositions([]);
     }
   }, [phase, roundIndex, rounds.length]);
 
   function startGame() {
     setRounds(Array.from({ length: ROUND_COUNT }, generateTypeOrderRound));
     setScores([]);
+    setDetails([]);
     setPhase('playing');
   }
 
@@ -49,6 +55,7 @@ export default function TypeOrderGameScreen({
     setTimeout(() => {
       const updated = [...scores, roundScore];
       setScores(updated);
+      setDetails((d) => [...d, { correct, elapsedMs: elapsed }]);
       if (updated.length >= rounds.length) {
         setPhase('results');
         onFinish(updated.reduce((a, b) => a + b, 0));
@@ -57,7 +64,7 @@ export default function TypeOrderGameScreen({
   }
 
   function handleTap(pos: number) {
-    if (roundIndex >= rounds.length || flash !== null) return;
+    if (roundIndex >= rounds.length || flash !== null || answeredPositions.includes(pos)) return;
     const round = rounds[roundIndex];
     const sizeIndex = round.displayOrder[pos];
     const sortedDesc = [...round.sizes.keys()].sort((a, b) => round.sizes[b] - round.sizes[a]);
@@ -68,6 +75,7 @@ export default function TypeOrderGameScreen({
       finishRound(false);
       return;
     }
+    setAnsweredPositions((prev) => [...prev, pos]);
     if (nextRank + 1 >= round.sizes.length) {
       finishRound(true);
     } else {
@@ -80,7 +88,7 @@ export default function TypeOrderGameScreen({
 
   if (phase === 'intro') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
@@ -89,9 +97,9 @@ export default function TypeOrderGameScreen({
           Five labels, shuffled sizes. Tap them largest to smallest, as fast as you can, {ROUND_COUNT} times.
         </Text>
         {bestScore !== null && <Text style={styles.best}>Best score: {bestScore.toFixed(0)} / {ROUND_COUNT * 10}</Text>}
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+        <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
           <Text style={styles.primaryButtonText}>START</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -102,7 +110,7 @@ export default function TypeOrderGameScreen({
     }
     const round = rounds[roundIndex];
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>✕ Exit</Text>
         </Pressable>
@@ -112,17 +120,24 @@ export default function TypeOrderGameScreen({
         <View style={styles.labelList}>
           {round.displayOrder.map((sizeIndex, pos) => {
             const isFlashed = flash?.pos === pos;
+            const isAnswered = answeredPositions.includes(pos);
             return (
               <Pressable
                 key={pos}
                 onPress={() => handleTap(pos)}
+                disabled={isAnswered}
                 style={[
                   styles.labelRow,
-                  isFlashed && (flash!.ok ? styles.labelCorrect : styles.labelWrong),
+                  isAnswered && styles.labelCorrect,
+                  isFlashed && !flash!.ok && styles.labelWrong,
                 ]}
               >
-                <Text style={{ fontSize: round.sizes[sizeIndex], color: theme.fg, fontFamily: theme.displayFont }}>
-                  Heading
+                <Text
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                  style={{ fontSize: round.sizes[sizeIndex], color: theme.fg, fontFamily: theme.displayFont }}
+                >
+                  {round.labels[sizeIndex]}
                 </Text>
               </Pressable>
             );
@@ -136,23 +151,30 @@ export default function TypeOrderGameScreen({
   const max = rounds.length * 10;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
       <Text style={styles.eyebrow}>RESULTS</Text>
       <Text style={styles.scoreTotal}>{total} / {max}</Text>
       <Text style={styles.body}>{verdictForTypeOrderScore(total, max)}</Text>
+      <Text style={styles.scoreExplainer}>
+        Each round is a speed score, not partial credit: a wrong tap ends the round at 0, and any correct
+        round scores at least 3 — up to 10 for ranking all five in under 0.7s, losing a point for every
+        extra 0.7s after that.
+      </Text>
 
       <View style={styles.roundList}>
         {scores.map((s, i) => (
           <View key={i} style={styles.roundRow}>
-            <Text style={styles.roundLabel}>ROUND {i + 1}</Text>
+            <Text style={styles.roundLabel}>
+              ROUND {i + 1} · {details[i]?.correct ? `${(details[i].elapsedMs / 1000).toFixed(1)}s` : 'missed'}
+            </Text>
             <Text style={styles.roundScore}>{s} / 10</Text>
           </View>
         ))}
       </View>
 
-      <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+      <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
         <Text style={styles.primaryButtonText}>PLAY AGAIN</Text>
-      </Pressable>
+      </AnimatedPressable>
       <Pressable onPress={onBack} style={styles.doneLink}>
         <Text style={styles.doneLinkText}>Done for now</Text>
       </Pressable>
@@ -162,32 +184,32 @@ export default function TypeOrderGameScreen({
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 8 },
-    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: 8, marginBottom: 16 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
+    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
-    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: 20 },
-    labelList: { marginTop: 24, gap: 14 },
-    labelRow: { borderWidth: 1, borderColor: theme.border, borderRadius: 4, padding: 14 },
-    labelCorrect: { borderColor: theme.success },
+    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
+    labelList: { marginTop: space.space24, gap: space.space14 },
+    labelRow: { borderWidth: border.hairline, borderColor: theme.border, borderRadius: radius.card, padding: space.space14 },
+    labelCorrect: { borderColor: theme.success, backgroundColor: theme.success + '1a' },
     labelWrong: { borderColor: theme.danger },
     primaryButton: {
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.fg,
-      borderRadius: 4,
+      borderRadius: radius.card,
       paddingVertical: 18,
       alignItems: 'center',
-      marginTop: 12,
+      marginTop: space.space12,
     },
-    pressed: { opacity: 0.6 },
     primaryButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 14, letterSpacing: 1 },
-    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: 12 },
-    roundList: { marginTop: 28, gap: 12 },
+    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: space.space12 },
+    scoreExplainer: { color: theme.fgFaint, fontSize: 13, lineHeight: 19, marginTop: space.space16 },
+    roundList: { marginTop: space.sectionGap, gap: space.space12 },
     roundRow: { flexDirection: 'row', justifyContent: 'space-between' },
     roundLabel: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
     roundScore: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12 },
-    doneLink: { marginTop: 16, alignItems: 'center' },
+    doneLink: { marginTop: space.space16, alignItems: 'center' },
     doneLinkText: { color: theme.fgFaint, fontSize: 13, textDecorationLine: 'underline' },
   });
 }

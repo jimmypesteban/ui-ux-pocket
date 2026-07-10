@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
+import AnimatedPressable from '../components/AnimatedPressable';
 import { generateTargets, HSL, hslToCss, scoreRound, verdictForScore } from '../lib/colorGame';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 const ROUND_COUNT = 5;
 const MEMORIZE_MS = 1800;
@@ -72,7 +74,7 @@ export default function ColorGameScreen({
 
   if (phase === 'intro') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
@@ -82,9 +84,9 @@ export default function ColorGameScreen({
           memory using hue, saturation, and lightness. Most people are worse at this than they think.
         </Text>
         {bestScore !== null && <Text style={styles.best}>Best score: {bestScore.toFixed(1)} / {ROUND_COUNT * 10}</Text>}
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+        <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
           <Text style={styles.primaryButtonText}>START</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -96,7 +98,7 @@ export default function ColorGameScreen({
         <Pressable onPress={onBack} style={[styles.exitOverlay, { top: insets.top + 16 }]}>
           <Text style={styles.exitOverlayText}>✕ Exit</Text>
         </Pressable>
-        <Text style={[styles.memorizeCount, { top: insets.top + 24 }]}>
+        <Text style={[styles.memorizeCount, { top: insets.top + space.space24 }]}>
           {Math.min(memorizeIndex + 1, targets.length)} / {targets.length}
         </Text>
       </View>
@@ -108,7 +110,7 @@ export default function ColorGameScreen({
       return <View style={styles.fullBleed} />;
     }
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>✕ Exit</Text>
         </Pressable>
@@ -121,9 +123,9 @@ export default function ColorGameScreen({
         <ColorSlider label="SATURATION" value={guess.s} min={0} max={100} onChange={(s) => setGuess((g) => ({ ...g, s }))} />
         <ColorSlider label="LIGHTNESS" value={guess.l} min={0} max={100} onChange={(l) => setGuess((g) => ({ ...g, l }))} />
 
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={lockInGuess}>
+        <AnimatedPressable style={styles.primaryButton} onPress={lockInGuess}>
           <Text style={styles.primaryButtonText}>LOCK IN</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -132,7 +134,7 @@ export default function ColorGameScreen({
   const max = targets.length * 10;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
       <Text style={styles.eyebrow}>RESULTS</Text>
       <Text style={styles.scoreTotal}>{total.toFixed(1)} / {max}</Text>
       <Text style={styles.body}>{verdictForScore(total, max)}</Text>
@@ -146,9 +148,9 @@ export default function ColorGameScreen({
         ))}
       </View>
 
-      <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+      <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
         <Text style={styles.primaryButtonText}>PLAY AGAIN</Text>
-      </Pressable>
+      </AnimatedPressable>
       <Pressable onPress={onBack} style={styles.doneLink}>
         <Text style={styles.doneLinkText}>Done for now</Text>
       </Pressable>
@@ -158,13 +160,13 @@ export default function ColorGameScreen({
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
     fullBleed: { flex: 1 },
-    back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 8 },
-    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: 8, marginBottom: 16 },
+    back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
+    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
-    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: 20 },
+    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     memorizeCount: {
       position: 'absolute',
       alignSelf: 'center',
@@ -180,23 +182,22 @@ function makeStyles(theme: Theme) {
       fontSize: 13,
       letterSpacing: 1,
     },
-    swatch: { height: 140, borderRadius: 4, marginBottom: 24, borderWidth: 1, borderColor: theme.border },
+    swatch: { height: 140, borderRadius: radius.card, marginBottom: space.space24, borderWidth: border.hairline, borderColor: theme.border },
     primaryButton: {
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.fg,
-      borderRadius: 4,
+      borderRadius: radius.card,
       paddingVertical: 18,
       alignItems: 'center',
-      marginTop: 12,
+      marginTop: space.space12,
     },
-    pressed: { opacity: 0.6 },
     primaryButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 14, letterSpacing: 1 },
-    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: 12 },
-    roundList: { marginTop: 28, gap: 10 },
-    roundRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    roundSwatch: { width: 32, height: 32, borderRadius: 4, borderWidth: 1, borderColor: theme.border },
+    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: space.space12 },
+    roundList: { marginTop: space.sectionGap, gap: space.space10 },
+    roundRow: { flexDirection: 'row', alignItems: 'center', gap: space.space12 },
+    roundSwatch: { width: 32, height: 32, borderRadius: radius.card, borderWidth: border.hairline, borderColor: theme.border },
     roundScore: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 13 },
-    doneLink: { marginTop: 16, alignItems: 'center' },
+    doneLink: { marginTop: space.space16, alignItems: 'center' },
     doneLinkText: { color: theme.fgFaint, fontSize: 13, textDecorationLine: 'underline' },
   });
 }

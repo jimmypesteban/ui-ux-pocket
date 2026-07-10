@@ -1,13 +1,12 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DesignTypeGlyph from '../components/DesignTypeGlyph';
 import { DESIGN_TYPES } from '../lib/designTypes';
 import { getPairing, otherTypes } from '../lib/pairings';
 import { Theme, useTheme } from '../lib/theme';
 import { DesignTypeId } from '../lib/types';
+import { border, space } from '../lib/tokens';
 
 export default function PairingsScreen({ yourType }: { yourType: DesignTypeId }) {
-  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = makeStyles(theme);
   const others = otherTypes(yourType);
@@ -15,7 +14,7 @@ export default function PairingsScreen({ yourType }: { yourType: DesignTypeId })
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 24 }}
+      contentContainerStyle={{ paddingTop: space.subScreenTop, paddingBottom: space.space24 }}
     >
       <Text style={styles.eyebrow}>HOW YOU CRITIQUE TOGETHER</Text>
       <Text style={styles.subhead}>As {DESIGN_TYPES[yourType].name}, paired with:</Text>
@@ -48,13 +47,13 @@ export default function PairingsScreen({ yourType }: { yourType: DesignTypeId })
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
     eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2 },
-    subhead: { color: theme.fgDim, fontSize: 14, marginTop: 8, marginBottom: 12 },
-    card: { borderTopWidth: 1, borderTopColor: theme.border, paddingVertical: 24 },
-    otherRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    subhead: { color: theme.fgDim, fontSize: 14, marginTop: space.space8, marginBottom: space.space12 },
+    card: { borderTopWidth: border.hairline, borderTopColor: theme.border, paddingVertical: space.space24 },
+    otherRow: { flexDirection: 'row', alignItems: 'center', gap: space.space8 },
     otherName: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
-    pairingTitle: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 22, marginTop: 6 },
-    verdict: { color: theme.fg, fontSize: 15, lineHeight: 22, marginTop: 10 },
+    pairingTitle: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 22, marginTop: space.space6 },
+    verdict: { color: theme.fg, fontSize: 15, lineHeight: 22, marginTop: space.space10 },
   });
 }

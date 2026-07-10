@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
+import AnimatedPressable from '../components/AnimatedPressable';
 import {
   generatePixelMatchRound,
   PixelMatchRound,
@@ -9,6 +10,7 @@ import {
   verdictForPixelMatchScore,
 } from '../lib/pixelMatchGame';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 const ROUND_COUNT = 5;
 
@@ -31,6 +33,7 @@ export default function PixelMatchGameScreen({
   const [width, setWidth] = useState(150);
   const [height, setHeight] = useState(100);
   const [scores, setScores] = useState<number[]>([]);
+  const [guesses, setGuesses] = useState<{ width: number; height: number }[]>([]);
 
   const roundIndex = scores.length;
 
@@ -39,6 +42,7 @@ export default function PixelMatchGameScreen({
     setWidth(150);
     setHeight(100);
     setScores([]);
+    setGuesses([]);
     setPhase('playing');
   }
 
@@ -47,6 +51,7 @@ export default function PixelMatchGameScreen({
     const roundScore = scorePixelMatch(rounds[roundIndex], width, height);
     const updated = [...scores, roundScore];
     setScores(updated);
+    setGuesses((g) => [...g, { width, height }]);
     if (updated.length >= rounds.length) {
       setPhase('results');
       onFinish(updated.reduce((a, b) => a + b, 0));
@@ -58,7 +63,7 @@ export default function PixelMatchGameScreen({
 
   if (phase === 'intro') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
@@ -68,9 +73,9 @@ export default function PixelMatchGameScreen({
           inspector panel — just your eye.
         </Text>
         {bestScore !== null && <Text style={styles.best}>Best score: {bestScore.toFixed(1)} / {ROUND_COUNT * 10}</Text>}
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+        <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
           <Text style={styles.primaryButtonText}>START</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -81,7 +86,7 @@ export default function PixelMatchGameScreen({
     }
     const round = rounds[roundIndex];
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>✕ Exit</Text>
         </Pressable>
@@ -91,15 +96,15 @@ export default function PixelMatchGameScreen({
         </Text>
 
         <View style={styles.stage}>
-          <View style={{ width, height, backgroundColor: theme.fg, borderRadius: 4 }} />
+          <View style={{ width, height, backgroundColor: theme.fg, borderRadius: radius.card }} />
         </View>
 
         <ColorSlider label="WIDTH" value={width} min={40} max={260} onChange={setWidth} hideValue />
         <ColorSlider label="HEIGHT" value={height} min={40} max={220} onChange={setHeight} hideValue />
 
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={lockInGuess}>
+        <AnimatedPressable style={styles.primaryButton} onPress={lockInGuess}>
           <Text style={styles.primaryButtonText}>LOCK IN</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -108,25 +113,37 @@ export default function PixelMatchGameScreen({
   const max = rounds.length * 10;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
       <Text style={styles.eyebrow}>RESULTS</Text>
       <Text style={styles.scoreTotal}>{total.toFixed(1)} / {max}</Text>
       <Text style={styles.body}>{verdictForPixelMatchScore(total, max)}</Text>
 
       <View style={styles.roundList}>
-        {scores.map((s, i) => (
-          <View key={i} style={styles.roundRow}>
-            <Text style={styles.roundLabel}>
-              ROUND {i + 1} · {rounds[i].targetWidth}×{rounds[i].targetHeight}
-            </Text>
-            <Text style={styles.roundScore}>{s.toFixed(1)} / 10</Text>
-          </View>
-        ))}
+        {scores.map((s, i) => {
+          const target = rounds[i];
+          const guess = guesses[i];
+          const widthDiff = guess.width - target.targetWidth;
+          const heightDiff = guess.height - target.targetHeight;
+          const fmt = (d: number) => (d >= 0 ? `+${d}` : `${d}`);
+          return (
+            <View key={i} style={styles.roundBlock}>
+              <View style={styles.roundRow}>
+                <Text style={styles.roundLabel}>
+                  ROUND {i + 1} · Target {target.targetWidth}×{target.targetHeight}
+                </Text>
+                <Text style={styles.roundScore}>{s.toFixed(1)} / 10</Text>
+              </View>
+              <Text style={styles.roundDelta}>
+                You drew {guess.width}×{guess.height} · {fmt(widthDiff)}px W, {fmt(heightDiff)}px H
+              </Text>
+            </View>
+          );
+        })}
       </View>
 
-      <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+      <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
         <Text style={styles.primaryButtonText}>PLAY AGAIN</Text>
-      </Pressable>
+      </AnimatedPressable>
       <Pressable onPress={onBack} style={styles.doneLink}>
         <Text style={styles.doneLinkText}>Done for now</Text>
       </Pressable>
@@ -136,37 +153,38 @@ export default function PixelMatchGameScreen({
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 8 },
-    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: 8, marginBottom: 16 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
+    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
-    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: 20 },
+    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     stage: {
       height: 240,
-      borderRadius: 4,
-      marginBottom: 24,
-      borderWidth: 1,
+      borderRadius: radius.card,
+      marginBottom: space.space24,
+      borderWidth: border.hairline,
       borderColor: theme.border,
       alignItems: 'center',
       justifyContent: 'center',
     },
     primaryButton: {
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.fg,
-      borderRadius: 4,
+      borderRadius: radius.card,
       paddingVertical: 18,
       alignItems: 'center',
-      marginTop: 12,
+      marginTop: space.space12,
     },
-    pressed: { opacity: 0.6 },
     primaryButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 14, letterSpacing: 1 },
-    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: 12 },
-    roundList: { marginTop: 28, gap: 12 },
+    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: space.space12 },
+    roundList: { marginTop: space.sectionGap, gap: space.space16 },
+    roundBlock: { gap: space.space4 },
     roundRow: { flexDirection: 'row', justifyContent: 'space-between' },
     roundLabel: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
     roundScore: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12 },
-    doneLink: { marginTop: 16, alignItems: 'center' },
+    roundDelta: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12 },
+    doneLink: { marginTop: space.space16, alignItems: 'center' },
     doneLinkText: { color: theme.fgFaint, fontSize: 13, textDecorationLine: 'underline' },
   });
 }

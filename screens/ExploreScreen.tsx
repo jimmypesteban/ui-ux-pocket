@@ -1,9 +1,9 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DesignTypeGlyph from '../components/DesignTypeGlyph';
 import { DESIGN_TYPES } from '../lib/designTypes';
 import { Theme, useTheme } from '../lib/theme';
 import { DesignTypeId } from '../lib/types';
+import { border, radius, space } from '../lib/tokens';
 
 const ORDER: DesignTypeId[] = [
   'grid-zealot',
@@ -17,13 +17,12 @@ const ORDER: DesignTypeId[] = [
 ];
 
 export default function ExploreScreen({ yourType }: { yourType: DesignTypeId }) {
-  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 24 }}
+      contentContainerStyle={{ paddingTop: space.subScreenTop, paddingBottom: space.space24 }}
     >
       <Text style={styles.eyebrow}>THE EIGHT TYPES</Text>
       {ORDER.map((id) => {
@@ -47,10 +46,10 @@ export default function ExploreScreen({ yourType }: { yourType: DesignTypeId }) 
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 20 },
-    card: { borderTopWidth: 1, borderTopColor: theme.border, paddingVertical: 24 },
-    nameRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space20 },
+    card: { borderTopWidth: border.hairline, borderTopColor: theme.border, paddingVertical: space.space24 },
+    nameRow: { flexDirection: 'row', alignItems: 'center', gap: space.space10 },
     name: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 24 },
     youBadge: {
       color: theme.bg,
@@ -58,11 +57,11 @@ function makeStyles(theme: Theme) {
       fontFamily: theme.monoFont,
       fontSize: 10,
       letterSpacing: 1,
-      paddingHorizontal: 6,
+      paddingHorizontal: space.space6,
       paddingVertical: 2,
-      borderRadius: 2,
+      borderRadius: radius.chip,
     },
-    tagline: { color: theme.fgDim, fontSize: 15, lineHeight: 21, marginTop: 8, fontStyle: 'italic' },
-    description: { color: theme.fg, fontSize: 15, lineHeight: 22, marginTop: 12 },
+    tagline: { color: theme.fgDim, fontSize: 15, lineHeight: 21, marginTop: space.space8, fontStyle: 'italic' },
+    description: { color: theme.fg, fontSize: 15, lineHeight: 22, marginTop: space.space12 },
   });
 }

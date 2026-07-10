@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
-import { generateKerningRound, KerningRound, scoreKerningGuess, verdictForKerningScore } from '../lib/kerningGame';
+import AnimatedPressable from '../components/AnimatedPressable';
+import { generateKerningRound, KerningRound, scoreKerningRound, verdictForKerningScore } from '../lib/kerningGame';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 const ROUND_COUNT = 5;
 
@@ -23,7 +25,7 @@ export default function KerningGameScreen({
   const styles = makeStyles(theme);
   const [phase, setPhase] = useState<Phase>('intro');
   const [rounds, setRounds] = useState<KerningRound[]>([]);
-  const [offset, setOffset] = useState(0);
+  const [offsets, setOffsets] = useState<number[]>([]);
   const [scores, setScores] = useState<number[]>([]);
 
   const roundIndex = scores.length;
@@ -31,39 +33,43 @@ export default function KerningGameScreen({
   function startGame() {
     const generated = Array.from({ length: ROUND_COUNT }, generateKerningRound);
     setRounds(generated);
-    setOffset(generated[0].startOffset);
+    setOffsets(generated[0].startOffsets);
     setScores([]);
     setPhase('playing');
   }
 
+  function updateOffset(gapIndex: number, value: number) {
+    setOffsets((prev) => prev.map((v, i) => (i === gapIndex ? value : v)));
+  }
+
   function lockInGuess() {
     if (roundIndex >= rounds.length) return;
-    const roundScore = scoreKerningGuess(offset);
+    const roundScore = scoreKerningRound(offsets);
     const updated = [...scores, roundScore];
     setScores(updated);
     if (updated.length >= rounds.length) {
       setPhase('results');
       onFinish(updated.reduce((a, b) => a + b, 0));
     } else {
-      setOffset(rounds[updated.length].startOffset);
+      setOffsets(rounds[updated.length].startOffsets);
     }
   }
 
   if (phase === 'intro') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
         <Text style={styles.title}>Kerning Call</Text>
         <Text style={styles.body}>
-          A letter pair loads badly spaced. Nudge the gap until it looks right, {ROUND_COUNT} times. The
-          target is zero — a natural, untouched gap.
+          A word loads with every gap scrambled. Nudge each gap with its own slider until the whole word
+          reads naturally, {ROUND_COUNT} times. The target is zero on every gap.
         </Text>
         {bestScore !== null && <Text style={styles.best}>Best score: {bestScore.toFixed(1)} / {ROUND_COUNT * 10}</Text>}
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+        <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
           <Text style={styles.primaryButtonText}>START</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -73,8 +79,9 @@ export default function KerningGameScreen({
       return <View style={styles.container} />;
     }
     const round = rounds[roundIndex];
+    const letters = round.word.split('');
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>✕ Exit</Text>
         </Pressable>
@@ -82,16 +89,37 @@ export default function KerningGameScreen({
         <Text style={styles.title}>Fix the spacing.</Text>
 
         <View style={styles.sample}>
-          <Text style={{ fontSize: round.fontSize, color: theme.fg, fontWeight: '700' }}>{round.left}</Text>
-          <View style={{ width: Math.max(0, 20 + offset) }} />
-          <Text style={{ fontSize: round.fontSize, color: theme.fg, fontWeight: '700' }}>{round.right}</Text>
+          {letters.map((letter, i) => (
+            <Text
+              key={i}
+              style={{
+                fontSize: round.fontSize,
+                color: theme.fg,
+                fontWeight: '700',
+                marginLeft: i === 0 ? 0 : 20 + offsets[i - 1],
+              }}
+            >
+              {letter}
+            </Text>
+          ))}
         </View>
 
-        <ColorSlider label="SPACING" value={offset} min={-30} max={30} onChange={setOffset} />
+        <View style={styles.sliderList}>
+          {offsets.map((value, i) => (
+            <ColorSlider
+              key={i}
+              label={`${letters[i]}${letters[i + 1]}`}
+              value={value}
+              min={-40}
+              max={40}
+              onChange={(v) => updateOffset(i, v)}
+            />
+          ))}
+        </View>
 
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={lockInGuess}>
+        <AnimatedPressable style={styles.primaryButton} onPress={lockInGuess}>
           <Text style={styles.primaryButtonText}>LOCK IN</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -100,7 +128,7 @@ export default function KerningGameScreen({
   const max = rounds.length * 10;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
       <Text style={styles.eyebrow}>RESULTS</Text>
       <Text style={styles.scoreTotal}>{total.toFixed(1)} / {max}</Text>
       <Text style={styles.body}>{verdictForKerningScore(total, max)}</Text>
@@ -108,15 +136,15 @@ export default function KerningGameScreen({
       <View style={styles.roundList}>
         {scores.map((s, i) => (
           <View key={i} style={styles.roundRow}>
-            <Text style={styles.roundLabel}>ROUND {i + 1}</Text>
+            <Text style={styles.roundLabel}>ROUND {i + 1} · {rounds[i].word}</Text>
             <Text style={styles.roundScore}>{s.toFixed(1)} / 10</Text>
           </View>
         ))}
       </View>
 
-      <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+      <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
         <Text style={styles.primaryButtonText}>PLAY AGAIN</Text>
-      </Pressable>
+      </AnimatedPressable>
       <Pressable onPress={onBack} style={styles.doneLink}>
         <Text style={styles.doneLinkText}>Done for now</Text>
       </Pressable>
@@ -126,38 +154,38 @@ export default function KerningGameScreen({
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 8 },
-    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: 8, marginBottom: 16 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
+    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
-    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: 20 },
+    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     sample: {
       height: 140,
-      borderRadius: 4,
-      marginBottom: 24,
-      borderWidth: 1,
+      borderRadius: radius.card,
+      marginBottom: space.space24,
+      borderWidth: border.hairline,
       borderColor: theme.border,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
     },
+    sliderList: { gap: space.space16 },
     primaryButton: {
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.fg,
-      borderRadius: 4,
+      borderRadius: radius.card,
       paddingVertical: 18,
       alignItems: 'center',
-      marginTop: 12,
+      marginTop: space.space12,
     },
-    pressed: { opacity: 0.6 },
     primaryButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 14, letterSpacing: 1 },
-    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: 12 },
-    roundList: { marginTop: 28, gap: 12 },
+    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: space.space12 },
+    roundList: { marginTop: space.sectionGap, gap: space.space12 },
     roundRow: { flexDirection: 'row', justifyContent: 'space-between' },
     roundLabel: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
     roundScore: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12 },
-    doneLink: { marginTop: 16, alignItems: 'center' },
+    doneLink: { marginTop: space.space16, alignItems: 'center' },
     doneLinkText: { color: theme.fgFaint, fontSize: 13, textDecorationLine: 'underline' },
   });
 }

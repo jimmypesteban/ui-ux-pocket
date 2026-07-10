@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { PanResponder, StyleSheet, Text, View } from 'react-native';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 export default function ColorSlider({
   label,
@@ -83,18 +84,18 @@ export default function ColorSlider({
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
     container: { marginBottom: 22 },
-    labelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    labelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: space.space8 },
     label: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
     value: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 11 },
     track: {
       height: 32,
-      borderRadius: 4,
+      borderRadius: radius.card,
       backgroundColor: theme.bgAlt,
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.border,
       justifyContent: 'center',
     },
-    fill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: theme.fgFaint, borderRadius: 4 },
+    fill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: theme.fgFaint, borderRadius: radius.card },
     thumb: {
       position: 'absolute',
       width: 4,

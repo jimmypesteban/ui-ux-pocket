@@ -1,29 +1,32 @@
 export type KerningRound = {
-  left: string;
-  right: string;
+  word: string;
   fontSize: number;
-  startOffset: number;
+  startOffsets: number[];
 };
 
-const PAIRS: { left: string; right: string }[] = [
-  { left: 'A', right: 'V' },
-  { left: 'T', right: 'o' },
-  { left: 'W', right: 'A' },
-  { left: 'P', right: 'a' },
-  { left: 'L', right: 'T' },
-  { left: 'Y', right: 'o' },
-];
+// Real short words instead of isolated 2-letter pairs — every adjacent
+// letter pair in the word is its own gap, each scrambled independently and
+// each with its own slider to fix.
+const WORDS = ['TYPE', 'WAVY', 'GRID', 'FLOW', 'VOTE', 'WALK', 'YOGA', 'JAZZ', 'ZOOM', 'WOVEN'];
 
 export function generateKerningRound(): KerningRound {
-  const pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
-  const fontSize = 64 + Math.floor(Math.random() * 24);
-  const startOffset = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.floor(Math.random() * 16));
-  return { ...pair, fontSize, startOffset };
+  const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+  const fontSize = 56 + Math.floor(Math.random() * 20);
+  const gapCount = word.length - 1;
+  const startOffsets = Array.from(
+    { length: gapCount },
+    () => (Math.random() < 0.5 ? -1 : 1) * (10 + Math.floor(Math.random() * 16))
+  );
+  return { word, fontSize, startOffsets };
 }
 
-export function scoreKerningGuess(guessOffset: number): number {
-  const diff = Math.abs(guessOffset);
-  return Math.max(0, Math.min(10, Math.round((10 - diff / 2.5) * 10) / 10));
+export function scoreKerningRound(guessOffsets: number[]): number {
+  const perGap = guessOffsets.map((offset) => {
+    const diff = Math.abs(offset);
+    return Math.max(0, Math.min(10, (10 - diff / 2.5)));
+  });
+  const avg = perGap.reduce((a, b) => a + b, 0) / perGap.length;
+  return Math.round(avg * 10) / 10;
 }
 
 export function verdictForKerningScore(total: number, max: number): string {

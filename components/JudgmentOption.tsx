@@ -1,6 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import AnimatedPressable from './AnimatedPressable';
 import { OptionSpec } from '../lib/types';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 export default function JudgmentOption({
   spec,
@@ -22,7 +24,7 @@ export default function JudgmentOption({
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
       disabled={disabled}
       style={[
@@ -47,7 +49,7 @@ export default function JudgmentOption({
       </View>
       {revealed && isCorrect && <Text style={styles.badge}>CORRECT</Text>}
       {revealed && isChosen && !isCorrect && <Text style={styles.badgeWrong}>YOUR PICK</Text>}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -55,18 +57,18 @@ function makeStyles(theme: Theme) {
   return StyleSheet.create({
     frame: {
       flex: 1,
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.border,
-      borderRadius: 4,
-      padding: 12,
-      gap: 10,
+      borderRadius: radius.card,
+      padding: space.space12,
+      gap: space.space10,
     },
     frameCorrect: { borderColor: theme.success },
     frameWrong: { borderColor: theme.danger },
     letter: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
     mockStage: {
       backgroundColor: theme.bgAlt,
-      borderRadius: 2,
+      borderRadius: radius.chip,
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: 70,

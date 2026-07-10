@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { MotiView } from 'moti';
 
 import { useTheme, useThemeMode } from './lib/theme';
 import ThemeProvider from './lib/ThemeProvider';
@@ -48,9 +49,9 @@ import KerningGameScreen from './screens/KerningGameScreen';
 import PixelMatchGameScreen from './screens/PixelMatchGameScreen';
 import CenterGameScreen from './screens/CenterGameScreen';
 import TypeOrderGameScreen from './screens/TypeOrderGameScreen';
-import ExploreScreen from './screens/ExploreScreen';
-import FlashcardsScreen from './screens/FlashcardsScreen';
-import PairingsScreen from './screens/PairingsScreen';
+import TypesScreen from './screens/TypesScreen';
+import LawsScreen from './screens/LawsScreen';
+import GamesScreen from './screens/GamesScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import TabBar, { TabKey } from './components/TabBar';
 
@@ -327,10 +328,10 @@ function RootScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
-      <View style={styles.content}>
-        {tab === 'home' && (
-          <HomeScreen
-            profile={profile}
+      <MotiView key={tab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
+        {tab === 'home' && <HomeScreen profile={profile} stats={stats} />}
+        {tab === 'games' && (
+          <GamesScreen
             stats={stats}
             colorBest={colorBest}
             contrastBest={contrastBest}
@@ -349,9 +350,8 @@ function RootScreen() {
             onPlayTypeOrderGame={() => setView('typeordergame')}
           />
         )}
-        {tab === 'explore' && <ExploreScreen yourType={profile.designTypeId} />}
-        {tab === 'laws' && <FlashcardsScreen />}
-        {tab === 'pairings' && <PairingsScreen yourType={profile.designTypeId} />}
+        {tab === 'laws' && <LawsScreen />}
+        {tab === 'explore' && <TypesScreen yourType={profile.designTypeId} />}
         {tab === 'profile' && (
           <ProfileScreen
             stats={stats}
@@ -365,7 +365,7 @@ function RootScreen() {
             onRetakeQuiz={handleRetakeQuiz}
           />
         )}
-      </View>
+      </MotiView>
       <TabBar active={tab} onChange={setTab} />
     </View>
   );

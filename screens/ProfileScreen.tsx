@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MotiView } from 'moti';
 import StatsScreen from './StatsScreen';
 import HistoryScreen from './HistoryScreen';
 import SettingsScreen from './SettingsScreen';
+import AnimatedPressable from '../components/AnimatedPressable';
 import AvatarIcon from '../components/AvatarIcon';
 import { AvatarId } from '../lib/avatars';
 import { Theme, useTheme } from '../lib/theme';
 import { GameLogEntry, GameStats } from '../lib/types';
+import { space, radius, border } from '../lib/tokens';
 
 type SubTab = 'stats' | 'log' | 'settings';
 
@@ -38,7 +41,7 @@ export default function ProfileScreen({
   const [subTab, setSubTab] = useState<SubTab>('stats');
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24 }]}>
       <View style={styles.titleRow}>
         <AvatarIcon id={avatarId} size={36} color={theme.fg} />
         <Text style={styles.title}>Profile</Text>
@@ -48,7 +51,7 @@ export default function ProfileScreen({
         <SubTabButton label="LOG" active={subTab === 'log'} onPress={() => setSubTab('log')} styles={styles} />
         <SubTabButton label="SETTINGS" active={subTab === 'settings'} onPress={() => setSubTab('settings')} styles={styles} />
       </View>
-      <View style={styles.content}>
+      <MotiView key={subTab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
         {subTab === 'stats' && <StatsScreen stats={stats} gameLog={gameLog} />}
         {subTab === 'log' && <HistoryScreen stats={stats} gameLog={gameLog} />}
         {subTab === 'settings' && (
@@ -62,7 +65,7 @@ export default function ProfileScreen({
             onRetakeQuiz={onRetakeQuiz}
           />
         )}
-      </View>
+      </MotiView>
     </View>
   );
 }
@@ -79,26 +82,26 @@ function SubTabButton({
   styles: ReturnType<typeof makeStyles>;
 }) {
   return (
-    <Pressable onPress={onPress} style={styles.subTabButton}>
+    <AnimatedPressable onPress={onPress} style={styles.subTabButton}>
       <Text style={[styles.subTabText, active && styles.subTabTextActive]}>{label}</Text>
       {active && <View style={styles.subTabDot} />}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.rowGap, marginBottom: space.space20 },
     title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 30 },
     subTabRow: {
       flexDirection: 'row',
-      borderBottomWidth: 1,
+      borderBottomWidth: border.hairline,
       borderBottomColor: theme.border,
-      paddingBottom: 12,
-      marginBottom: 4,
+      paddingBottom: space.space12,
+      marginBottom: space.space4,
     },
-    subTabButton: { flex: 1, alignItems: 'center', gap: 6 },
+    subTabButton: { flex: 1, alignItems: 'center', gap: space.space6 },
     subTabText: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
     subTabTextActive: { color: theme.fg },
     subTabDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: theme.fg },

@@ -6,6 +6,7 @@ import { classifyDesignType } from '../lib/designTypes';
 import { DEFAULT_AVATAR_ID } from '../lib/avatars';
 import { Theme, useTheme } from '../lib/theme';
 import { Profile } from '../lib/types';
+import { border, radius, space } from '../lib/tokens';
 
 export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: Profile) => void }) {
   const insets = useSafeAreaInsets();
@@ -42,7 +43,7 @@ export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: P
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
       <Text style={styles.progress}>
         {index + 1} / {QUIZ_QUESTIONS.length}
       </Text>
@@ -64,22 +65,22 @@ export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: P
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24, justifyContent: 'space-between' },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding, justifyContent: 'space-between' },
     progress: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
     prompt: {
       color: theme.fg,
       fontFamily: theme.displayFont,
       fontSize: 28,
       lineHeight: 36,
-      marginTop: 24,
+      marginTop: space.space24,
     },
-    options: { gap: 12, marginTop: 32 },
+    options: { gap: space.space12, marginTop: space.space32 },
     option: {
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.border,
-      borderRadius: 4,
-      paddingHorizontal: 16,
-      paddingVertical: 16,
+      borderRadius: radius.card,
+      paddingHorizontal: space.space16,
+      paddingVertical: space.cardPadding,
     },
     optionPressed: { backgroundColor: theme.bgAlt, borderColor: theme.fg },
     optionText: { color: theme.fg, fontSize: 15, lineHeight: 21 },

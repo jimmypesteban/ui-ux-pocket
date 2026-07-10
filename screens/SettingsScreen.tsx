@@ -1,8 +1,10 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import AnimatedPressable from '../components/AnimatedPressable';
 import ColorSlider from '../components/ColorSlider';
 import AvatarIcon from '../components/AvatarIcon';
 import { AVATAR_IDS, AvatarId } from '../lib/avatars';
 import { Theme, useTheme, useThemeMode } from '../lib/theme';
+import { border, radius, space } from '../lib/tokens';
 
 function formatHour(hour: number): string {
   const period = hour >= 12 ? 'PM' : 'AM';
@@ -32,7 +34,7 @@ export default function SettingsScreen({
   const { mode, toggleMode } = useThemeMode();
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: 20, paddingBottom: 24 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: space.subScreenTop, paddingBottom: space.space24 }}>
       <Text style={styles.eyebrow}>APPEARANCE</Text>
       <View style={styles.row}>
         <Text style={styles.rowLabel}>THEME</Text>
@@ -71,19 +73,19 @@ export default function SettingsScreen({
       <Text style={styles.rowLabel}>AVATAR</Text>
       <View style={styles.avatarGrid}>
         {AVATAR_IDS.map((id) => (
-          <Pressable
+          <AnimatedPressable
             key={id}
             onPress={() => onChangeAvatar(id)}
             style={[styles.avatarSlot, avatarId === id && styles.avatarSlotActive]}
           >
             <AvatarIcon id={id} size={40} color={theme.fg} />
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </View>
 
-      <Pressable onPress={onRetakeQuiz} style={styles.retake}>
+      <AnimatedPressable onPress={onRetakeQuiz} style={styles.retake}>
         <Text style={styles.retakeText}>Retake the quiz</Text>
-      </Pressable>
+      </AnimatedPressable>
 
       <View style={styles.divider} />
       <Text style={styles.footer}>UI/UX Pocket · v1.0.0</Text>
@@ -103,36 +105,36 @@ function SegmentButton({
   styles: ReturnType<typeof makeStyles>;
 }) {
   return (
-    <Pressable onPress={onPress} style={[styles.segmentButton, active && styles.segmentButtonActive]}>
+    <AnimatedPressable onPress={onPress} style={[styles.segmentButton, active && styles.segmentButtonActive]}>
       <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{label}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 14 },
-    row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space14 },
+    row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: space.space8 },
     rowLabel: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
-    segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.border, borderRadius: 4, overflow: 'hidden' },
-    segmentButton: { paddingVertical: 8, paddingHorizontal: 14 },
+    segmented: { flexDirection: 'row', borderWidth: border.hairline, borderColor: theme.border, borderRadius: radius.card, overflow: 'hidden' },
+    segmentButton: { paddingVertical: space.space8, paddingHorizontal: space.space14 },
     segmentButtonActive: { backgroundColor: theme.fg },
     segmentText: { color: theme.fgDim, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1 },
     segmentTextActive: { color: theme.bg },
-    sliderWrap: { marginTop: 20 },
-    avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12, marginBottom: 24 },
+    sliderWrap: { marginTop: space.space20 },
+    avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.space12, marginTop: space.space12, marginBottom: space.space24 },
     avatarSlot: {
       width: 56,
       height: 56,
       borderRadius: 28,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: 'transparent',
     },
     avatarSlotActive: { borderColor: theme.fg },
-    divider: { height: 1, backgroundColor: theme.border, marginVertical: 28 },
+    divider: { height: 1, backgroundColor: theme.border, marginVertical: space.sectionGap },
     retake: { alignItems: 'flex-start' },
     retakeText: { color: theme.fgDim, fontSize: 15, textDecorationLine: 'underline' },
     footer: { color: theme.fgFaint, fontSize: 12, textAlign: 'center' },

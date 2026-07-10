@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CenterRound, generateCenterRound, verdictForCenterScore } from '../lib/centerGame';
+import { CenterRound, generateCenterRound, offsetDistance, verdictForCenterScore } from '../lib/centerGame';
+import AnimatedPressable from '../components/AnimatedPressable';
 import { Theme, useTheme } from '../lib/theme';
+import { space, radius, border } from '../lib/tokens';
 
 const ROUND_COUNT = 8;
 
@@ -51,7 +53,7 @@ export default function CenterGameScreen({
 
   if (phase === 'intro') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
@@ -61,9 +63,9 @@ export default function CenterGameScreen({
           {' '}{ROUND_COUNT} times.
         </Text>
         {bestScore !== null && <Text style={styles.best}>Best score: {bestScore.toFixed(0)} / {ROUND_COUNT}</Text>}
-        <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+        <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
           <Text style={styles.primaryButtonText}>START</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -74,7 +76,7 @@ export default function CenterGameScreen({
     }
     const round = rounds[roundIndex];
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>✕ Exit</Text>
         </Pressable>
@@ -98,18 +100,12 @@ export default function CenterGameScreen({
         </View>
 
         <View style={styles.answerRow}>
-          <Pressable
-            style={({ pressed }) => [styles.answerButton, pressed && styles.pressed]}
-            onPress={() => answer(true)}
-          >
+          <AnimatedPressable style={styles.answerButton} onPress={() => answer(true)}>
             <Text style={styles.answerButtonText}>CENTERED</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [styles.answerButton, pressed && styles.pressed]}
-            onPress={() => answer(false)}
-          >
+          </AnimatedPressable>
+          <AnimatedPressable style={styles.answerButton} onPress={() => answer(false)}>
             <Text style={styles.answerButtonText}>OFF-CENTER</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </View>
     );
@@ -118,14 +114,29 @@ export default function CenterGameScreen({
   const correctCount = answers.filter(Boolean).length;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + space.space24, paddingBottom: insets.bottom + space.space24 }]}>
       <Text style={styles.eyebrow}>RESULTS</Text>
       <Text style={styles.scoreTotal}>{correctCount} / {rounds.length}</Text>
       <Text style={styles.body}>{verdictForCenterScore(correctCount, rounds.length)}</Text>
 
-      <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]} onPress={startGame}>
+      <View style={styles.roundList}>
+        {answers.map((correct, i) => {
+          const round = rounds[i];
+          const offset = offsetDistance(round);
+          return (
+            <View key={i} style={styles.roundRow}>
+              <Text style={styles.roundLabel}>ROUND {i + 1} · {round.shape.toUpperCase()}</Text>
+              <Text style={[styles.roundScore, correct ? styles.roundScoreGood : styles.roundScoreBad]}>
+                {round.isCentered ? 'Centered' : `${offset.toFixed(1)}px off`} · {correct ? 'Correct' : 'Missed'}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+
+      <AnimatedPressable style={styles.primaryButton} onPress={startGame}>
         <Text style={styles.primaryButtonText}>PLAY AGAIN</Text>
-      </Pressable>
+      </AnimatedPressable>
       <Pressable onPress={onBack} style={styles.doneLink}>
         <Text style={styles.doneLinkText}>Done for now</Text>
       </Pressable>
@@ -135,30 +146,35 @@ export default function CenterGameScreen({
 
 function makeStyles(theme: Theme) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    back: { color: theme.fgDim, fontSize: 15, marginBottom: 24 },
-    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: 8 },
-    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: 8, marginBottom: 16 },
+    container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
+    back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
+    eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
+    title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
-    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: 20 },
-    stage: { alignItems: 'center', justifyContent: 'center', marginTop: 16, marginBottom: 24 },
+    best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
+    stage: { alignItems: 'center', justifyContent: 'center', marginTop: space.space16, marginBottom: space.space24 },
     shape: { borderWidth: 2, backgroundColor: theme.bgAlt },
     dot: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: theme.fg },
-    answerRow: { flexDirection: 'row', gap: 12 },
-    answerButton: { flex: 1, borderWidth: 1, borderColor: theme.fg, borderRadius: 4, paddingVertical: 16, alignItems: 'center' },
-    pressed: { opacity: 0.6 },
+    answerRow: { flexDirection: 'row', gap: space.space12 },
+    answerButton: { flex: 1, borderWidth: border.hairline, borderColor: theme.fg, borderRadius: radius.card, paddingVertical: space.cardPadding, alignItems: 'center' },
     answerButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
     primaryButton: {
-      borderWidth: 1,
+      borderWidth: border.hairline,
       borderColor: theme.fg,
-      borderRadius: 4,
+      borderRadius: radius.card,
       paddingVertical: 18,
       alignItems: 'center',
-      marginTop: 12,
+      marginTop: space.space12,
     },
     primaryButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 14, letterSpacing: 1 },
-    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: 12 },
-    doneLink: { marginTop: 16, alignItems: 'center' },
+    scoreTotal: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 40, marginBottom: space.space12 },
+    roundList: { marginTop: space.sectionGap, gap: space.space12 },
+    roundRow: { flexDirection: 'row', justifyContent: 'space-between' },
+    roundLabel: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 1 },
+    roundScore: { fontFamily: theme.monoFont, fontSize: 12 },
+    roundScoreGood: { color: theme.success },
+    roundScoreBad: { color: theme.danger },
+    doneLink: { marginTop: space.space16, alignItems: 'center' },
     doneLinkText: { color: theme.fgFaint, fontSize: 13, textDecorationLine: 'underline' },
   });
 }

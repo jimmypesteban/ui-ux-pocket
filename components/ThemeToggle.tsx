@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet } from 'react-native';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { useTheme, useThemeMode } from '../lib/theme';
+import { space } from '../lib/tokens';
 
 export default function ThemeToggle() {
   const theme = useTheme();
@@ -40,5 +41,5 @@ export default function ThemeToggle() {
 }
 
 const styles = StyleSheet.create({
-  button: { padding: 4 },
+  button: { padding: space.space4 },
 });
