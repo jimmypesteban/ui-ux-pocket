@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
 import AnimatedPressable from '../components/AnimatedPressable';
+import GameIcon from '../components/GameIcon';
 import {
   generatePixelMatchRound,
   PixelMatchRound,
@@ -67,7 +68,10 @@ export default function PixelMatchGameScreen({
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
-        <Text style={styles.title}>Pixel Match</Text>
+        <View style={styles.titleRow}>
+          <GameIcon game="pixelmatch" size={28} color={theme.fg} />
+          <Text style={styles.title}>Pixel Match</Text>
+        </View>
         <Text style={styles.body}>
           You get a target width and height. Draw a box that matches, {ROUND_COUNT} times. No ruler, no
           inspector panel — just your eye.
@@ -157,6 +161,7 @@ function makeStyles(theme: Theme) {
     back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
     eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
     title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.rowGap },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
     best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     stage: {

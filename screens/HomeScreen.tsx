@@ -8,14 +8,14 @@ import LawExample from '../components/LawExample';
 import ResourceFlashcard from '../components/ResourceFlashcard';
 import { DESIGN_TYPES } from '../lib/designTypes';
 import { quoteForToday } from '../lib/designQuotes';
-import { UX_LAWS } from '../lib/uxLaws';
+import { ALL_RESOURCES, collectionFor } from '../lib/collections';
 import { Theme, useTheme } from '../lib/theme';
 import { GameStats, Profile } from '../lib/types';
 import { space, radius } from '../lib/tokens';
 
-function todaysLawIndex(): number {
+function todaysResourceIndex(): number {
   const dayNumber = Math.floor(Date.now() / 86400000);
-  return dayNumber % UX_LAWS.length;
+  return dayNumber % ALL_RESOURCES.length;
 }
 
 export default function HomeScreen({ profile, stats }: { profile: Profile; stats: GameStats }) {
@@ -60,10 +60,10 @@ export default function HomeScreen({ profile, stats }: { profile: Profile; stats
       <View style={styles.divider} />
 
       <ResourceFlashcard
-        items={UX_LAWS}
-        initialIndex={todaysLawIndex()}
-        label="LAWS OF UX"
-        attribution="Adapted from lawsofux.com"
+        items={ALL_RESOURCES}
+        initialIndex={todaysResourceIndex()}
+        label={(item) => collectionFor(item)?.title ?? 'RESOURCES'}
+        attribution={(item) => collectionFor(item)?.attribution}
         renderIcon={(id, color) => <LawIcon id={id} size={40} color={color} />}
         renderExample={(id, color) => <LawExample id={id} color={color} />}
       />

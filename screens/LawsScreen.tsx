@@ -7,12 +7,9 @@ import CollectionIcon, { CollectionIconId } from '../components/CollectionIcon';
 import LawIcon from '../components/LawIcon';
 import LawExample from '../components/LawExample';
 import { Theme, useTheme } from '../lib/theme';
-import { LAWS_COLLECTION } from '../lib/uxLaws';
-import { HEURISTICS_COLLECTION } from '../lib/heuristics';
+import { ALL_COLLECTIONS } from '../lib/collections';
 import { ReadingRef, ResourceCollection } from '../lib/resources';
 import { border, radius, space } from '../lib/tokens';
-
-const COLLECTIONS: ResourceCollection[] = [LAWS_COLLECTION, HEURISTICS_COLLECTION];
 
 // We don't have a verified direct URL for every citation (papers/books
 // referenced predate the web, or live behind shifting publisher links), so
@@ -39,7 +36,7 @@ export default function LawsScreen() {
   const styles = makeStyles(theme);
   const [view, setView] = useState<Nav>({ mode: 'menu' });
 
-  const collection = view.mode !== 'menu' ? COLLECTIONS.find((c) => c.key === view.collectionKey) ?? null : null;
+  const collection = view.mode !== 'menu' ? ALL_COLLECTIONS.find((c: ResourceCollection) => c.key === view.collectionKey) ?? null : null;
 
   return (
     <ScrollView
@@ -53,7 +50,7 @@ export default function LawsScreen() {
       {view.mode === 'menu' && (
         <View style={styles.menuContainer}>
           <Text style={styles.title}>Laws & Principles</Text>
-          {COLLECTIONS.map((c) => (
+          {ALL_COLLECTIONS.map((c) => (
             <AnimatedPressable
               key={c.key}
               style={styles.menuCard}

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
 import AnimatedPressable from '../components/AnimatedPressable';
+import GameIcon from '../components/GameIcon';
 import { generateTargets, HSL, hslToCss, scoreRound, verdictForScore } from '../lib/colorGame';
 import { Theme, useTheme } from '../lib/theme';
 import { space, radius, border } from '../lib/tokens';
@@ -78,7 +79,10 @@ export default function ColorGameScreen({
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
-        <Text style={styles.title}>Color Recall</Text>
+        <View style={styles.titleRow}>
+          <GameIcon game="color" size={28} color={theme.fg} />
+          <Text style={styles.title}>Color Recall</Text>
+        </View>
         <Text style={styles.body}>
           You will see {ROUND_COUNT} colors, one at a time. Then you will try to recreate each one from
           memory using hue, saturation, and lightness. Most people are worse at this than they think.
@@ -165,6 +169,7 @@ function makeStyles(theme: Theme) {
     back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
     eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
     title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.rowGap },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
     best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     memorizeCount: {

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlignmentRound, generateAlignmentRound, scoreRound, verdictForAlignmentScore } from '../lib/alignmentGame';
 import AnimatedPressable from '../components/AnimatedPressable';
+import GameIcon from '../components/GameIcon';
 import { Theme, useTheme } from '../lib/theme';
 import { space, radius, border } from '../lib/tokens';
 
@@ -67,7 +68,10 @@ export default function AlignmentGameScreen({
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
-        <Text style={styles.title}>Spot the Odd One</Text>
+        <View style={styles.titleRow}>
+          <GameIcon game="alignment" size={28} color={theme.fg} />
+          <Text style={styles.title}>Spot the Odd One</Text>
+        </View>
         <Text style={styles.body}>
           Six elements, one is off. Tap it as fast as you can. {ROUND_COUNT} rounds. Speed and accuracy
           both count.
@@ -157,6 +161,7 @@ function makeStyles(theme: Theme) {
     back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
     eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
     title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.rowGap },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
     best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     grid: {

@@ -1,19 +1,15 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Theme, useTheme } from '../lib/theme';
+import { Resource } from '../lib/resources';
 import { border, radius, space } from '../lib/tokens';
 
 // A reusable flip-card deck for browsing any "resource" — laws today, more
 // resource types later (patterns, heuristics, whatever gets added next).
-// Any array shaped like { id, name, tagline, explanation } works; the caller
-// supplies how to render the icon and (optionally) a visual example.
+// Any array shaped like a Resource works; the caller supplies how to render
+// the icon and (optionally) a visual example.
 
-export type FlashcardResource = {
-  id: string;
-  name: string;
-  tagline: string;
-  explanation: string;
-};
+export type FlashcardResource = Resource;
 
 function shuffledIndices(length: number): number[] {
   const arr = Array.from({ length }, (_, i) => i);
@@ -37,8 +33,8 @@ export default function ResourceFlashcard({
   renderIcon: (id: string, color: string) => React.ReactNode;
   renderExample?: (id: string, color: string) => React.ReactNode;
   initialIndex?: number;
-  label: string;
-  attribution?: string;
+  label: string | ((item: FlashcardResource) => string);
+  attribution?: string | ((item: FlashcardResource) => string | undefined);
   onExit?: () => void;
 }) {
   const theme = useTheme();
@@ -48,6 +44,8 @@ export default function ResourceFlashcard({
   const [flipped, setFlipped] = useState(false);
 
   const item = items[order[position]];
+  const resolvedLabel = typeof label === 'function' ? label(item) : label;
+  const resolvedAttribution = typeof attribution === 'function' ? attribution(item) : attribution;
 
   function goNext() {
     setFlipped(false);
@@ -73,7 +71,7 @@ export default function ResourceFlashcard({
         </Pressable>
       )}
       <View style={styles.headerRow}>
-        <Text style={styles.eyebrow}>{label}</Text>
+        <Text style={styles.eyebrow}>{resolvedLabel}</Text>
         <Text style={styles.count}>{position + 1} / {order.length}</Text>
       </View>
 
@@ -111,7 +109,7 @@ export default function ResourceFlashcard({
         <Text style={styles.shuffleText}>Shuffle the deck</Text>
       </Pressable>
 
-      {attribution && <Text style={styles.attribution}>{attribution}</Text>}
+      {resolvedAttribution && <Text style={styles.attribution}>{resolvedAttribution}</Text>}
     </View>
   );
 }

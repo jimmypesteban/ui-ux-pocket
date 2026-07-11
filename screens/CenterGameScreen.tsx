@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CenterRound, generateCenterRound, offsetDistance, verdictForCenterScore } from '../lib/centerGame';
 import AnimatedPressable from '../components/AnimatedPressable';
+import GameIcon from '../components/GameIcon';
 import { Theme, useTheme } from '../lib/theme';
 import { space, radius, border } from '../lib/tokens';
 
@@ -57,7 +58,10 @@ export default function CenterGameScreen({
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
-        <Text style={styles.title}>Dead Center</Text>
+        <View style={styles.titleRow}>
+          <GameIcon game="center" size={28} color={theme.fg} />
+          <Text style={styles.title}>Dead Center</Text>
+        </View>
         <Text style={styles.body}>
           A dot sits inside a shape. Sometimes it's centered, sometimes it's off by a little. Call it,
           {' '}{ROUND_COUNT} times.
@@ -150,6 +154,7 @@ function makeStyles(theme: Theme) {
     back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
     eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
     title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.rowGap },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
     best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     stage: { alignItems: 'center', justifyContent: 'center', marginTop: space.space16, marginBottom: space.space24 },

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
 import AnimatedPressable from '../components/AnimatedPressable';
+import GameIcon from '../components/GameIcon';
 import { generateKerningRound, KerningRound, scoreKerningRound, verdictForKerningScore } from '../lib/kerningGame';
 import { Theme, useTheme } from '../lib/theme';
 import { space, radius, border } from '../lib/tokens';
@@ -61,7 +62,10 @@ export default function KerningGameScreen({
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
-        <Text style={styles.title}>Kerning Call</Text>
+        <View style={styles.titleRow}>
+          <GameIcon game="kerning" size={28} color={theme.fg} />
+          <Text style={styles.title}>Kerning Call</Text>
+        </View>
         <Text style={styles.body}>
           A word loads with every gap scrambled. Nudge each gap with its own slider until the whole word
           reads naturally, {ROUND_COUNT} times. The target is zero on every gap.
@@ -158,6 +162,7 @@ function makeStyles(theme: Theme) {
     back: { color: theme.fgDim, fontSize: 15, marginBottom: space.space24 },
     eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space8 },
     title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 26, lineHeight: 32, marginTop: space.space8, marginBottom: space.space16 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.rowGap },
     body: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
     best: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, marginTop: space.space20 },
     sample: {
