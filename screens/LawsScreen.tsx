@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from '../components/AnimatedPressable';
@@ -8,7 +8,7 @@ import LawIcon from '../components/LawIcon';
 import LawExample from '../components/LawExample';
 import { Theme, useTheme } from '../lib/theme';
 import { ALL_COLLECTIONS } from '../lib/collections';
-import { ReadingRef, ResourceCollection } from '../lib/resources';
+import { ReadingRef, Resource, ResourceCollection } from '../lib/resources';
 import { border, radius, space } from '../lib/tokens';
 
 // We don't have a verified direct URL for every citation (papers/books
@@ -30,11 +30,23 @@ type Nav =
   | { mode: 'grid'; collectionKey: string }
   | { mode: 'detail'; collectionKey: string; index: number };
 
-export default function LawsScreen() {
+export default function LawsScreen({
+  jumpTarget,
+  onViewResource,
+}: {
+  jumpTarget?: { collectionKey: string; index: number; nonce: number } | null;
+  onViewResource?: (item: Resource) => void;
+}) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = makeStyles(theme);
   const [view, setView] = useState<Nav>({ mode: 'menu' });
+
+  useEffect(() => {
+    if (!jumpTarget) return;
+    setView({ mode: 'detail', collectionKey: jumpTarget.collectionKey, index: jumpTarget.index });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jumpTarget?.nonce]);
 
   const collection = view.mode !== 'menu' ? ALL_COLLECTIONS.find((c: ResourceCollection) => c.key === view.collectionKey) ?? null : null;
 
@@ -99,6 +111,7 @@ export default function LawsScreen() {
           onChangeIndex={(i) => setView({ mode: 'detail', collectionKey: collection.key, index: i })}
           onGoToMenu={() => setView({ mode: 'menu' })}
           onGoToGrid={() => setView({ mode: 'grid', collectionKey: collection.key })}
+          onViewResource={onViewResource}
           styles={styles}
           theme={theme}
         />
@@ -113,6 +126,7 @@ function ResourceDetail({
   onChangeIndex,
   onGoToMenu,
   onGoToGrid,
+  onViewResource,
   styles,
   theme,
 }: {
@@ -121,6 +135,7 @@ function ResourceDetail({
   onChangeIndex: (i: number) => void;
   onGoToMenu: () => void;
   onGoToGrid: () => void;
+  onViewResource?: (item: Resource) => void;
   styles: ReturnType<typeof makeStyles>;
   theme: Theme;
 }) {
@@ -129,6 +144,11 @@ function ResourceDetail({
   const item = items[index];
   const prevIndex = (index - 1 + items.length) % items.length;
   const nextIndex = (index + 1) % items.length;
+
+  useEffect(() => {
+    onViewResource?.(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item]);
 
   return (
     <View>

@@ -25,6 +25,7 @@ function content(id: string, color: string) {
       );
 
     case 'choice-overload':
+    case 'choice-overload-bias':
       // a hub of many equal options with a cursor stuck in the middle
       return (
         <>
@@ -298,6 +299,7 @@ function content(id: string, color: string) {
       );
 
     case 'peak-end-rule':
+    case 'peak-end-rule-bias':
       // a rough journey, but the peak and the ending are what's remembered
       return (
         <>
@@ -387,6 +389,7 @@ function content(id: string, color: string) {
       );
 
     case 'zeigarnik-effect':
+    case 'zeigarnik-effect-bias':
       // an almost-finished ring — the gap is what pulls you back
       return <Path d="M130 20 A40 40 0 1 1 95 88" stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" />;
 
@@ -520,6 +523,467 @@ function content(id: string, color: string) {
           <Path d="M130 30 V95 M130 30 Q90 22 55 32 V90 Q90 80 130 88 M130 30 Q170 22 205 32 V90 Q170 80 130 88" stroke={color} strokeWidth={STROKE} fill="none" />
           <Circle cx={205} cy={95} r={16} stroke={color} strokeWidth={STROKE} fill="none" />
           <Line x1={216} y1={106} x2={230} y2={120} stroke={color} strokeWidth={STROKE} />
+        </>
+      );
+
+    // --- Design Processes ---------------------------------------------
+
+    case 'double-diamond':
+      // diverge, converge, diverge, converge
+      return (
+        <>
+          <Path d="M20 60 L75 25 L130 60 L75 95 Z" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M130 60 L185 25 L240 60 L185 95 Z" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+        </>
+      );
+
+    case 'design-thinking':
+      // five non-linear stages, looping back on themselves
+      return (
+        <>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Circle key={i} cx={30 + i * 50} cy={60} r={13} stroke={color} strokeWidth={STROKE} fill={i === 4 ? color : 'none'} />
+          ))}
+          {[0, 1, 2, 3].map((i) => (
+            <Line key={i} x1={43 + i * 50} y1={60} x2={67 + i * 50} y2={60} stroke={color} strokeWidth={STROKE} />
+          ))}
+          <Path d="M180 78 Q130 110 80 78" stroke={color} strokeWidth={STROKE} fill="none" strokeDasharray="5 6" {...dim} />
+        </>
+      );
+
+    case 'design-sprint':
+      // five days, the last one lands
+      return (
+        <>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Rect
+              key={i}
+              x={20 + i * 44}
+              y={35}
+              width={32}
+              height={50}
+              rx={3}
+              stroke={color}
+              strokeWidth={STROKE}
+              fill={i === 4 ? color : 'none'}
+              opacity={i === 4 ? 1 : 0.5}
+            />
+          ))}
+          <Path d="M28 108 L232 108" stroke={color} strokeWidth={STROKE} strokeDasharray="5 6" {...dim} />
+        </>
+      );
+
+    case 'lean-ux':
+      // build, measure, learn — a closed loop
+      return (
+        <>
+          <Path d="M130 25 A38 38 0 1 1 92 60" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M80 50 L92 60 L104 48" stroke={color} strokeWidth={STROKE} fill="none" strokeLinejoin="round" />
+          <Circle cx={130} cy={25} r={5} fill={color} />
+          <Circle cx={168} cy={60} r={5} fill={color} {...dim} />
+          <Circle cx={130} cy={95} r={5} fill={color} {...dim} />
+        </>
+      );
+
+    case 'jobs-to-be-done':
+    case 'jobs-to-be-done-product':
+      // people don't want the drill, they want the hole
+      return (
+        <>
+          <Circle cx={70} cy={70} r={16} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M110 60 L200 45" stroke={color} strokeWidth={STROKE} />
+          <Path d="M192 36 L204 43 L196 55" stroke={color} strokeWidth={STROKE} fill="none" strokeLinejoin="round" />
+          <Rect x={195} y={20} width={40} height={14} rx={3} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+        </>
+      );
+
+    case 'agile-scrum':
+      // short loops, each ending in a shipped increment
+      return (
+        <>
+          {[0, 1, 2].map((i) => (
+            <Fragment key={i}>
+              <Path d={`M${25 + i * 80} 60 A20 20 0 1 1 ${45 + i * 80} 80`} stroke={color} strokeWidth={STROKE} fill="none" {...(i < 2 ? dim : {})} />
+              <Rect x={38 + i * 80} y={75} width={14} height={14} fill={i === 2 ? color : 'none'} stroke={color} strokeWidth={STROKE} opacity={i === 2 ? 1 : 0.5} />
+            </Fragment>
+          ))}
+        </>
+      );
+
+    case 'usability-testing':
+      // watching a real person move through a real task
+      return (
+        <>
+          <Rect x={25} y={25} width={110} height={75} rx={4} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M45 90 Q80 45 120 60" stroke={color} strokeWidth={STROKE} fill="none" strokeDasharray="5 6" {...dim} />
+          <Circle cx={120} cy={60} r={4} fill={color} />
+          <Circle cx={195} cy={70} r={22} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Line x1={212} y1={87} x2={230} y2={105} stroke={color} strokeWidth={STROKE} />
+        </>
+      );
+
+    case 'design-critique':
+      // feedback aimed at the work, not at each other
+      return (
+        <>
+          <Rect x={95} y={30} width={70} height={60} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M20 30 H60 A8 8 0 0 1 68 38 V52 A8 8 0 0 1 60 60 H40 L26 72 V60 H20 A8 8 0 0 1 20 60 Z" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M180 55 H220 A8 8 0 0 1 228 63 V77 A8 8 0 0 1 220 85 H206 L192 97 V85 H180 A8 8 0 0 1 180 85 Z" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Line x1={68} y1={50} x2={93} y2={50} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={182} y1={70} x2={165} y2={70} stroke={color} strokeWidth={STROKE} />
+        </>
+      );
+
+    // --- Product Thinking -----------------------------------------------
+
+    case 'rice-scoring':
+      // reach × impact × confidence ÷ effort, weighed into one score
+      return (
+        <>
+          {['R', 'I', 'C'].map((l, i) => (
+            <Rect key={l} x={20 + i * 42} y={40} width={30} height={30} stroke={color} strokeWidth={STROKE} fill="none" />
+          ))}
+          <Line x1={150} y1={40} x2={150} y2={70} stroke={color} strokeWidth={STROKE} />
+          <Line x1={140} y1={55} x2={160} y2={55} stroke={color} strokeWidth={STROKE} />
+          <Rect x={170} y={40} width={30} height={30} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M210 55 L235 55" stroke={color} strokeWidth={STROKE} />
+          <Path d="M228 47 L238 55 L228 63" stroke={color} strokeWidth={STROKE} fill="none" />
+        </>
+      );
+
+    case 'north-star-metric':
+      // every team's effort converging on one guiding number
+      return (
+        <>
+          <Path d="M130 15 L138 33 L158 33 L142 45 L148 64 L130 52 L112 64 L118 45 L102 33 L122 33 Z" fill={color} />
+          {[50, 130, 210].map((x, i) => (
+            <Line key={i} x1={x} y1={100} x2={130} y2={62} stroke={color} strokeWidth={STROKE} {...dim} />
+          ))}
+        </>
+      );
+
+    case 'mvp':
+      // the smallest usable core, inside the full imagined product
+      return (
+        <>
+          <Rect x={40} y={20} width={180} height={80} rx={4} stroke={color} strokeWidth={STROKE} strokeDasharray="6 7" fill="none" {...dim} />
+          <Rect x={95} y={45} width={70} height={30} rx={3} stroke={color} strokeWidth={STROKE} fill={color} />
+        </>
+      );
+
+    case 'opportunity-solution-tree':
+      // one outcome, several opportunities, several solutions each
+      return (
+        <>
+          <Circle cx={130} cy={18} r={9} fill={color} />
+          {[70, 190].map((x, i) => (
+            <Fragment key={i}>
+              <Line x1={130} y1={27} x2={x} y2={53} stroke={color} strokeWidth={STROKE} />
+              <Circle cx={x} cy={60} r={8} stroke={color} strokeWidth={STROKE} fill="none" />
+            </Fragment>
+          ))}
+          {[40, 100, 160, 220].map((x, i) => (
+            <Fragment key={i}>
+              <Line x1={i < 2 ? 70 : 190} y1={68} x2={x} y2={92} stroke={color} strokeWidth={STROKE} {...dim} />
+              <Circle cx={x} cy={98} r={6} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+            </Fragment>
+          ))}
+        </>
+      );
+
+    case 'kano-model':
+      // basic expectations, performance, and delighters curve differently
+      return (
+        <>
+          <Line x1={30} y1={95} x2={30} y2={15} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          <Line x1={30} y1={95} x2={235} y2={95} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          <Path d="M30 55 L235 55" stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={30} y1={95} x2={220} y2={30} stroke={color} strokeWidth={STROKE} />
+          <Path d="M30 55 Q140 55 220 15" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+        </>
+      );
+
+    case 'aarrr-metrics':
+      // a funnel — each stage narrower than the last
+      return (
+        <>
+          <Path d="M20 20 H240 L175 55 H85 Z" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M85 55 L100 80 H160 L175 55 Z" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M100 80 L112 105 H148 L160 80 Z" stroke={color} strokeWidth={STROKE} fill={color} />
+        </>
+      );
+
+    case 'product-market-fit':
+      // two shapes that were made for each other
+      return (
+        <>
+          <Path d="M20 30 H110 V60 Q125 60 125 75 Q125 90 110 90 H20 Z" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M240 90 H150 V60 Q135 60 135 45 Q135 30 150 30 H240 Z" stroke={color} strokeWidth={STROKE} fill="none" />
+        </>
+      );
+
+    // --- Cognitive Biases -------------------------------------------------
+
+    case 'anchoring-bias':
+      // the first number drops anchor; everything after is judged against it
+      return (
+        <>
+          <Line x1={70} y1={20} x2={70} y2={70} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Circle cx={70} cy={80} r={14} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M58 80 H82 M62 87 H78" stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          <Path d="M70 20 Q130 12 190 20" stroke={color} strokeWidth={STROKE} fill="none" strokeDasharray="5 6" {...dim} />
+          <Circle cx={190} cy={55} r={10} fill={color} />
+        </>
+      );
+
+    case 'confirmation-bias':
+      // only the matching shapes make it through the filter
+      return (
+        <>
+          <Path d="M25 25 H235 L155 60 L235 95 H25 L105 60 Z" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Circle cx={70} cy={45} r={7} fill={color} />
+          <Circle cx={70} cy={75} r={7} fill={color} />
+          <Rect x={175} y={39} width={14} height={14} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Circle cx={182} cy={75} r={7} fill={color} />
+        </>
+      );
+
+    case 'loss-aversion':
+      // a loss weighs roughly twice as heavy as an equivalent gain
+      return (
+        <>
+          <Line x1={130} y1={15} x2={130} y2={60} stroke={color} strokeWidth={STROKE} />
+          <Line x1={60} y1={35} x2={200} y2={35} stroke={color} strokeWidth={STROKE} />
+          <Line x1={60} y1={35} x2={60} y2={80} stroke={color} strokeWidth={STROKE} />
+          <Line x1={200} y1={35} x2={200} y2={58} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Circle cx={60} cy={92} r={20} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Circle cx={200} cy={68} r={10} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+        </>
+      );
+
+    case 'framing-effect':
+      // the same ratio, described two ways
+      return (
+        <>
+          <Rect x={20} y={35} width={90} height={26} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Rect x={20} y={35} width={81} height={26} fill={color} />
+          <Rect x={150} y={35} width={90} height={26} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Rect x={150} y={35} width={9} height={26} fill={color} {...dim} />
+        </>
+      );
+
+    case 'iso-effect':
+      // hands assembling it themselves is what makes it worth more
+      return (
+        <>
+          {[[35, 55], [55, 55], [45, 40]].map(([x, y], i) => (
+            <Rect key={i} x={x} y={y} width={16} height={16} stroke={color} strokeWidth={STROKE} fill={color} />
+          ))}
+          <Path d="M100 60 L140 60" stroke={color} strokeWidth={STROKE} />
+          <Path d="M133 52 L143 60 L133 68" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M205 20 L214 30 L223 20 A6.5 6.5 0 1 0 214 34 A6.5 6.5 0 1 0 205 20 Z" fill={color} />
+        </>
+      );
+
+    case 'survivorship-bias':
+      // studying only what came back hides where the real damage was
+      return (
+        <>
+          <Path d="M20 60 H100 L140 30 L150 45 L200 30 V45 L150 60 L200 75 V90 L150 75 L140 90 L100 60" stroke={color} strokeWidth={STROKE} fill="none" />
+          {[[60, 50], [90, 65], [130, 45], [160, 68], [125, 68]].map(([x, y], i) => (
+            <Circle key={i} cx={x} cy={y} r={4} fill={color} />
+          ))}
+          <Path d="M215 30 L240 20 M215 90 L240 100" stroke={color} strokeWidth={STROKE} {...dim} />
+        </>
+      );
+
+    // --- Design Artifacts -------------------------------------------------
+
+    case 'persona':
+      // an identity card standing in for a real person
+      return (
+        <>
+          <Rect x={30} y={20} width={130} height={80} rx={4} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Circle cx={62} cy={50} r={14} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M40 90 Q62 68 84 90" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Line x1={95} y1={40} x2={148} y2={40} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={95} y1={55} x2={140} y2={55} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={95} y1={70} x2={148} y2={70} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={95} y1={85} x2={125} y2={85} stroke={color} strokeWidth={STROKE} {...dim} />
+        </>
+      );
+
+    case 'empathy-map':
+      // says, thinks, does, feels — four quadrants around the same person
+      return (
+        <>
+          <Line x1={130} y1={15} x2={130} y2={105} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          <Line x1={30} y1={60} x2={230} y2={60} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          <Circle cx={130} cy={60} r={14} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M60 32 Q65 25 80 28" stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" />
+          <Circle cx={60} cy={90} r={5} fill={color} {...dim} />
+          <Rect x={175} y={26} width={22} height={16} rx={2} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M60 100 L45 108 M60 100 L75 108" stroke={color} strokeWidth={STROKE} {...dim} />
+        </>
+      );
+
+    case 'user-journey-map':
+      // an emotional up-and-down across the stages of one task
+      return (
+        <>
+          <Line x1={20} y1={90} x2={240} y2={90} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          <Path d="M20 70 Q60 20 100 60 Q140 100 180 45 Q210 20 240 55" stroke={color} strokeWidth={STROKE} fill="none" />
+          {[20, 100, 180, 240].map((x, i) => (
+            <Line key={i} x1={x} y1={90} x2={x} y2={96} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          ))}
+        </>
+      );
+
+    case 'affinity-diagram':
+      // loose notes, sorted until three themes emerge
+      return (
+        <>
+          {[[20, 20], [40, 15], [15, 40], [35, 45], [25, 30]].map(([x, y], i) => (
+            <Rect key={i} x={x} y={y} width={14} height={14} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          ))}
+          <Path d="M70 45 L100 45" stroke={color} strokeWidth={STROKE} />
+          <Path d="M93 37 L103 45 L93 53" stroke={color} strokeWidth={STROKE} fill="none" />
+          {[[125, 25], [143, 25], [134, 43]].map(([x, y], i) => (
+            <Rect key={`a-${i}`} x={x} y={y} width={14} height={14} fill={color} />
+          ))}
+          {[[170, 25], [188, 25], [179, 43]].map(([x, y], i) => (
+            <Rect key={`b-${i}`} x={x} y={y} width={14} height={14} fill={color} />
+          ))}
+          {[[213, 25], [231, 25], [222, 43]].map(([x, y], i) => (
+            <Rect key={`c-${i}`} x={x} y={y} width={14} height={14} fill={color} />
+          ))}
+        </>
+      );
+
+    case 'crazy-eights':
+      // eight panels, eight fast ideas
+      return (
+        <>
+          <Line x1={130} y1={15} x2={130} y2={105} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          {[1, 2, 3].map((i) => (
+            <Line key={i} x1={30 + i * 50} y1={15} x2={30 + i * 50} y2={105} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          ))}
+          <Line x1={30} y1={60} x2={230} y2={60} stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+          {[
+            'M40 30 L50 40', 'M85 45 Q95 25 105 45', 'M135 25 L155 45', 'M180 45 Q195 25 210 45',
+            'M40 75 Q55 90 65 75', 'M90 75 L110 95', 'M140 95 Q155 75 170 95', 'M195 75 L215 95',
+          ].map((d, i) => (
+            <Path key={i} d={d} stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" />
+          ))}
+        </>
+      );
+
+    case 'design-workshop':
+      // people around a table, building the answer together
+      return (
+        <>
+          <Rect x={70} y={40} width={120} height={45} rx={4} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Rect x={90} y={52} width={16} height={16} fill={color} {...dim} />
+          <Rect x={122} y={52} width={16} height={16} fill={color} />
+          <Rect x={154} y={52} width={16} height={16} fill={color} {...dim} />
+          {[[45, 30], [45, 95], [215, 30], [215, 95]].map(([x, y], i) => (
+            <Circle key={i} cx={x} cy={y} r={9} stroke={color} strokeWidth={STROKE} fill="none" />
+          ))}
+        </>
+      );
+
+    case 'wireframe':
+      // structure only — the layout, none of the polish
+      return (
+        <>
+          <Rect x={30} y={15} width={200} height={90} rx={3} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Line x1={30} y1={40} x2={230} y2={40} stroke={color} strokeWidth={STROKE} />
+          <Rect x={42} y={52} width={60} height={40} stroke={color} strokeWidth={STROKE} strokeDasharray="5 5" fill="none" {...dim} />
+          <Line x1={115} y1={58} x2={218} y2={58} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={115} y1={70} x2={210} y2={70} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={115} y1={82} x2={218} y2={82} stroke={color} strokeWidth={STROKE} {...dim} />
+        </>
+      );
+
+    case 'design-system':
+      // scattered pieces, unified into one governed source
+      return (
+        <>
+          <Circle cx={30} cy={25} r={8} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Rect x={22} y={55} width={16} height={16} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M22 95 L38 95 L30 82 Z" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M60 60 L110 60" stroke={color} strokeWidth={STROKE} />
+          <Path d="M103 52 L113 60 L103 68" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Rect x={125} y={30} width={110} height={60} rx={4} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Line x1={140} y1={48} x2={220} y2={48} stroke={color} strokeWidth={STROKE} />
+          <Line x1={140} y1={62} x2={205} y2={62} stroke={color} strokeWidth={STROKE} />
+          <Line x1={140} y1={76} x2={220} y2={76} stroke={color} strokeWidth={STROKE} />
+        </>
+      );
+
+    case 'component-library':
+      // one spec, reused everywhere — never rebuilt slightly differently
+      return (
+        <>
+          {[0, 1, 2, 3].map((i) => (
+            <Rect
+              key={i}
+              x={20 + i * 58}
+              y={45}
+              width={44}
+              height={28}
+              rx={5}
+              stroke={color}
+              strokeWidth={STROKE}
+              fill={i === 1 ? color : 'none'}
+              opacity={i === 2 ? 0.4 : 1}
+              strokeDasharray={i === 3 ? '5 5' : undefined}
+            />
+          ))}
+        </>
+      );
+
+    case 'style-guide':
+      // the palette and type, fixed once so no one has to guess
+      return (
+        <>
+          {[0, 1, 2, 3].map((i) => (
+            <Rect key={i} x={20 + i * 30} y={20} width={24} height={24} rx={3} fill={color} opacity={1 - i * 0.22} />
+          ))}
+          <Path d="M150 44 L165 16 L180 44 M156 34 H174" stroke={color} strokeWidth={STROKE} fill="none" strokeLinejoin="round" />
+          <Path d="M200 20 V44 M200 20 Q212 20 212 28 Q212 34 202 34" stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" {...dim} />
+          <Line x1={20} y1={80} x2={235} y2={80} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={20} y1={95} x2={190} y2={95} stroke={color} strokeWidth={STROKE} {...dim} />
+        </>
+      );
+
+    case 'prd':
+      // what we're building, and why, written down first
+      return (
+        <>
+          <Rect x={55} y={12} width={150} height={96} rx={3} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Line x1={70} y1={32} x2={190} y2={32} stroke={color} strokeWidth={STROKE} />
+          <Line x1={70} y1={50} x2={175} y2={50} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={70} y1={64} x2={190} y2={64} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={70} y1={78} x2={160} y2={78} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Path d="M70 92 L78 100 L94 84" stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      );
+
+    case 'user-story-ticket':
+      // one small, shippable unit of user-facing intent
+      return (
+        <>
+          <Path
+            d="M30 25 H210 A6 6 0 0 1 216 31 V51 A9 9 0 0 0 216 69 V89 A6 6 0 0 1 210 95 H30 A6 6 0 0 1 24 89 V69 A9 9 0 0 0 24 51 V31 A6 6 0 0 1 30 25 Z"
+            stroke={color}
+            strokeWidth={STROKE}
+            fill="none"
+          />
+          <Rect x={40} y={40} width={40} height={16} rx={3} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Line x1={95} y1={45} x2={195} y2={45} stroke={color} strokeWidth={STROKE} />
+          <Path d="M40 75 L47 82 L58 68" stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Line x1={68} y1={75} x2={195} y2={75} stroke={color} strokeWidth={STROKE} {...dim} />
         </>
       );
 

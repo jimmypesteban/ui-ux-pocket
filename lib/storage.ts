@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameLogEntry, GameStats, Profile } from './types';
+import { GameId, GameLogEntry, GameStats, Profile } from './types';
 
 const PROFILE_KEY = 'ui-ux-pocket:profile';
 const STATS_KEY = 'ui-ux-pocket:stats';
@@ -98,5 +98,27 @@ export async function appendGameLogEntry(entry: GameLogEntry): Promise<GameLogEn
   const current = await loadGameLog();
   const updated = [...current, entry].slice(-200);
   await AsyncStorage.setItem(GAME_LOG_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+const RECENT_ITEMS_KEY = 'ui-ux-pocket:recentSearchItems';
+const RECENT_ITEMS_LIMIT = 8;
+
+export type RecentItem = { kind: 'resource'; id: string } | { kind: 'game'; id: GameId };
+
+function recentItemKey(item: RecentItem): string {
+  return `${item.kind}:${item.id}`;
+}
+
+export async function loadRecentItems(): Promise<RecentItem[]> {
+  const raw = await AsyncStorage.getItem(RECENT_ITEMS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export async function pushRecentItem(item: RecentItem): Promise<RecentItem[]> {
+  const current = await loadRecentItems();
+  const withoutDupe = current.filter((existing) => recentItemKey(existing) !== recentItemKey(item));
+  const updated = [item, ...withoutDupe].slice(0, RECENT_ITEMS_LIMIT);
+  await AsyncStorage.setItem(RECENT_ITEMS_KEY, JSON.stringify(updated));
   return updated;
 }

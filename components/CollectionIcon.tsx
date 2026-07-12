@@ -1,6 +1,6 @@
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 
-export type CollectionIconId = 'laws' | 'heuristics';
+export type CollectionIconId = 'laws' | 'heuristics' | 'processes' | 'product' | 'biases' | 'artifacts';
 
 function content(id: CollectionIconId, color: string) {
   switch (id) {
@@ -29,6 +29,53 @@ function content(id: CollectionIconId, color: string) {
           <Line x1={31} y1={26} x2={34} y2={26} stroke={color} strokeWidth={2.5} />
           <Circle cx={16.5} cy={35.5} r={1.6} fill={color} />
           <Line x1={22} y1={35.5} x2={34} y2={35.5} stroke={color} strokeWidth={2.5} opacity={0.4} />
+        </>
+      );
+
+    case 'processes':
+      // the double diamond — diverge, converge, diverge, converge
+      return (
+        <>
+          <Path d="M4 24 L14 8 L24 24 L14 40 Z" stroke={color} strokeWidth={2.5} fill="none" strokeLinejoin="round" />
+          <Path d="M24 24 L34 8 L44 24 L34 40 Z" stroke={color} strokeWidth={2.5} fill="none" strokeLinejoin="round" />
+        </>
+      );
+
+    case 'product':
+      // a target — aim, prioritize, hit the right thing
+      return (
+        <>
+          <Circle cx={24} cy={24} r={17} stroke={color} strokeWidth={2.5} fill="none" />
+          <Circle cx={24} cy={24} r={10} stroke={color} strokeWidth={2.5} fill="none" />
+          <Circle cx={24} cy={24} r={3} fill={color} />
+        </>
+      );
+
+    case 'biases':
+      // a head in profile with a distortion line — perception isn't reality
+      return (
+        <>
+          <Path
+            d="M14 40 V30 C8 27 6 20 9 14 C12 8 19 5 26 6 C33 7 38 12 39 19 C39.5 22 40 24 43 25 L38 27 C38 30 37 32 35 34 L35 40"
+            stroke={color}
+            strokeWidth={2.5}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path d="M14 19 Q20 15 24 19 T34 19" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" opacity={0.5} />
+        </>
+      );
+
+    case 'artifacts':
+      // a stack of index cards — the deliverables designers actually hand off
+      return (
+        <>
+          <Rect x={10} y={16} width={28} height={20} rx={2} stroke={color} strokeWidth={2.5} fill="none" opacity={0.4} />
+          <Rect x={7} y={11} width={28} height={20} rx={2} stroke={color} strokeWidth={2.5} fill="none" opacity={0.7} />
+          <Rect x={4} y={6} width={28} height={20} rx={2} stroke={color} strokeWidth={2.5} fill="none" />
+          <Line x1={9} y1={13} x2={22} y2={13} stroke={color} strokeWidth={2} />
+          <Line x1={9} y1={18} x2={27} y2={18} stroke={color} strokeWidth={2} />
         </>
       );
   }

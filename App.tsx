@@ -7,7 +7,9 @@ import { MotiView } from 'moti';
 import { useTheme, useThemeMode } from './lib/theme';
 import ThemeProvider from './lib/ThemeProvider';
 import { AvatarId } from './lib/avatars';
-import { GameLogEntry, GameStats, JudgmentChallenge, Profile } from './lib/types';
+import { collectionFor } from './lib/collections';
+import { Resource } from './lib/resources';
+import { GameId, GameLogEntry, GameStats, JudgmentChallenge, Profile } from './lib/types';
 import {
   loadProfile,
   loadStats,
@@ -34,6 +36,9 @@ import {
   saveNotificationsEnabled,
   loadGameLog,
   appendGameLogEntry,
+  loadRecentItems,
+  pushRecentItem,
+  RecentItem,
 } from './lib/storage';
 import { pickTodaysChallenge } from './lib/challengePicker';
 import { recordAnswer } from './lib/gameLogic';
@@ -85,6 +90,8 @@ function RootScreen() {
   const [reminderHour, setReminderHour] = useState(9);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [gameLog, setGameLog] = useState<GameLogEntry[]>([]);
+  const [lawsJump, setLawsJump] = useState<{ collectionKey: string; index: number; nonce: number } | null>(null);
+  const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -100,7 +107,8 @@ function RootScreen() {
       loadReminderHour(),
       loadNotificationsEnabled(),
       loadGameLog(),
-    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log]) => {
+      loadRecentItems(),
+    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log, recent]) => {
       setProfile(p);
       setStats(s);
       setColorBest(cb);
@@ -113,6 +121,7 @@ function RootScreen() {
       setReminderHour(rh);
       setNotificationsEnabled(ne);
       setGameLog(log);
+      setRecentItems(recent);
       setView(p ? 'main' : 'quiz');
       if (p && ne) ensureDailyReminderScheduled(rh);
     });
@@ -121,6 +130,11 @@ function RootScreen() {
   async function logGame(game: GameLogEntry['game'], score: number, maxScore: number) {
     const updated = await appendGameLogEntry({ game, date: todayKey(), score, maxScore });
     setGameLog(updated);
+  }
+
+  async function recordRecent(item: RecentItem) {
+    const updated = await pushRecentItem(item);
+    setRecentItems(updated);
   }
 
   async function handleQuizComplete(newProfile: Profile) {
@@ -135,6 +149,38 @@ function RootScreen() {
     if (!stats) return;
     setActiveChallenge(pickTodaysChallenge(stats));
     setView('game');
+  }
+
+  function handleSelectResource(item: Resource) {
+    const collection = collectionFor(item);
+    if (!collection) return;
+    const index = collection.items.indexOf(item);
+    setLawsJump((prev) => ({ collectionKey: collection.key, index, nonce: (prev?.nonce ?? 0) + 1 }));
+    setTab('laws');
+  }
+
+  function handleViewResource(item: Resource) {
+    recordRecent({ kind: 'resource', id: item.id });
+  }
+
+  const GAME_VIEW_BY_ID: Partial<Record<GameId, Screen>> = {
+    color: 'colorgame',
+    contrast: 'contrastgame',
+    alignment: 'alignmentgame',
+    kerning: 'kerninggame',
+    pixelmatch: 'pixelmatchgame',
+    center: 'centergame',
+    typeorder: 'typeordergame',
+  };
+
+  function goToGame(id: GameId) {
+    recordRecent({ kind: 'game', id });
+    if (id === 'judgment') {
+      handlePlay();
+      return;
+    }
+    const target = GAME_VIEW_BY_ID[id];
+    if (target) setView(target);
   }
 
   async function handleGameFinish(chosen: 'A' | 'B', wasCorrect: boolean) {
@@ -329,7 +375,15 @@ function RootScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
       <MotiView key={tab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
-        {tab === 'home' && <HomeScreen profile={profile} stats={stats} />}
+        {tab === 'home' && (
+          <HomeScreen
+            profile={profile}
+            stats={stats}
+            recentItems={recentItems}
+            onSelectResource={handleSelectResource}
+            onSelectGame={goToGame}
+          />
+        )}
         {tab === 'games' && (
           <GamesScreen
             stats={stats}
@@ -340,17 +394,17 @@ function RootScreen() {
             pixelMatchBest={pixelMatchBest}
             centerBest={centerBest}
             typeOrderBest={typeOrderBest}
-            onPlay={handlePlay}
-            onPlayColorGame={() => setView('colorgame')}
-            onPlayContrastGame={() => setView('contrastgame')}
-            onPlayAlignmentGame={() => setView('alignmentgame')}
-            onPlayKerningGame={() => setView('kerninggame')}
-            onPlayPixelMatchGame={() => setView('pixelmatchgame')}
-            onPlayCenterGame={() => setView('centergame')}
-            onPlayTypeOrderGame={() => setView('typeordergame')}
+            onPlay={() => goToGame('judgment')}
+            onPlayColorGame={() => goToGame('color')}
+            onPlayContrastGame={() => goToGame('contrast')}
+            onPlayAlignmentGame={() => goToGame('alignment')}
+            onPlayKerningGame={() => goToGame('kerning')}
+            onPlayPixelMatchGame={() => goToGame('pixelmatch')}
+            onPlayCenterGame={() => goToGame('center')}
+            onPlayTypeOrderGame={() => goToGame('typeorder')}
           />
         )}
-        {tab === 'laws' && <LawsScreen />}
+        {tab === 'laws' && <LawsScreen jumpTarget={lawsJump} onViewResource={handleViewResource} />}
         {tab === 'explore' && <TypesScreen yourType={profile.designTypeId} />}
         {tab === 'profile' && (
           <ProfileScreen
