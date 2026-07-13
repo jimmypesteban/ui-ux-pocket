@@ -16,13 +16,25 @@ function LogoMark({ size, color }: { size: number; color: string }) {
   );
 }
 
-export default function AppLogo({ size = 16 }: { size?: number }) {
+export default function AppLogo({
+  size = 16,
+  onFoundEgg,
+}: {
+  size?: number;
+  onFoundEgg?: (id: string) => void;
+}) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
     <View style={styles.row}>
       <LogoMark size={size} color={theme.fg} />
-      <Text style={styles.wordmark}>UI/UX Pocket</Text>
+      <Text style={styles.wordmark}>
+        UI
+        <Text style={styles.slash} onPress={onFoundEgg ? () => onFoundEgg('wordmark-slash') : undefined}>
+          /
+        </Text>
+        UX Pocket
+      </Text>
     </View>
   );
 }
@@ -31,5 +43,6 @@ function makeStyles(theme: Theme) {
   return StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'center', gap: space.space8 },
     wordmark: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 12 },
+    slash: { color: theme.fgDim },
   });
 }

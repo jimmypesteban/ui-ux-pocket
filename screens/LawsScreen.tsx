@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from '../components/AnimatedPressable';
 import Breadcrumbs from '../components/Breadcrumbs';
 import CollectionIcon, { CollectionIconId } from '../components/CollectionIcon';
+import EasterEgg from '../components/EasterEgg';
 import LawIcon from '../components/LawIcon';
 import LawExample from '../components/LawExample';
 import { Theme, useTheme } from '../lib/theme';
@@ -33,9 +34,11 @@ type Nav =
 export default function LawsScreen({
   jumpTarget,
   onViewResource,
+  onFoundEgg,
 }: {
   jumpTarget?: { collectionKey: string; index: number; nonce: number } | null;
   onViewResource?: (item: Resource) => void;
+  onFoundEgg?: (id: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -74,7 +77,13 @@ export default function LawsScreen({
             </AnimatedPressable>
           ))}
           <View style={styles.comingSoonCard}>
-            <Text style={styles.comingSoonText}>More collections coming soon!</Text>
+            {onFoundEgg ? (
+              <EasterEgg id="coming-soon-typo" onFound={onFoundEgg}>
+                <Text style={styles.comingSoonText}>More collections comming soon!</Text>
+              </EasterEgg>
+            ) : (
+              <Text style={styles.comingSoonText}>More collections coming soon!</Text>
+            )}
           </View>
         </View>
       )}

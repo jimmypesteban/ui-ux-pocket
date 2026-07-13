@@ -15,10 +15,12 @@ export default function CenterGameScreen({
   onFinish,
   onBack,
   bestScore,
+  onFoundEgg,
 }: {
   onFinish: (score: number) => void;
   onBack: () => void;
   bestScore: number | null;
+  onFoundEgg?: (id: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -63,8 +65,9 @@ export default function CenterGameScreen({
           <Text style={styles.title}>Dead Center</Text>
         </View>
         <Text style={styles.body}>
-          A dot sits inside a shape. Sometimes it's centered, sometimes it's off by a little. Call it,
-          {' '}{ROUND_COUNT} times.
+          A dot sits inside a shape. Sometimes it's{' '}
+          <Text onPress={onFoundEgg ? () => onFoundEgg('center-typo') : undefined}>centred</Text>, sometimes it's
+          off by a little. Call it, {ROUND_COUNT} times.
         </Text>
         {bestScore !== null && <Text style={styles.best}>Best score: {bestScore.toFixed(0)} / {ROUND_COUNT}</Text>}
         <AnimatedPressable style={styles.primaryButton} onPress={startGame}>

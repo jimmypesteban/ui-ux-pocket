@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import AnimatedBar from '../components/AnimatedBar';
+import EasterEgg from '../components/EasterEgg';
 import { categoryBreakdown, gameLogBreakdown } from '../lib/gameLogic';
 import { GAME_LABELS, OTHER_GAME_ORDER } from '../lib/gameMeta';
 import { Theme, useTheme } from '../lib/theme';
@@ -15,7 +16,15 @@ const CATEGORY_LABELS: Record<ChallengeCategory, string> = {
 
 const CATEGORY_ORDER: ChallengeCategory[] = ['contrast', 'spacing', 'tap-targets', 'hierarchy'];
 
-export default function StatsScreen({ stats, gameLog }: { stats: GameStats; gameLog: GameLogEntry[] }) {
+export default function StatsScreen({
+  stats,
+  gameLog,
+  onFoundEgg,
+}: {
+  stats: GameStats;
+  gameLog: GameLogEntry[];
+  onFoundEgg?: (id: string) => void;
+}) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const breakdown = categoryBreakdown(stats);
@@ -31,7 +40,12 @@ export default function StatsScreen({ stats, gameLog }: { stats: GameStats; game
       <Text style={styles.eyebrow}>OVERALL</Text>
       <View style={styles.overallRow}>
         <Stat label="PLAYED" value={`${stats.totalPlayed}`} />
-        <Stat label="ACCURACY" value={overallAccuracy === null ? '—' : `${overallAccuracy}%`} />
+        <Stat
+          label="ACURACY"
+          value={overallAccuracy === null ? '—' : `${overallAccuracy}%`}
+          eggId={onFoundEgg ? 'accuracy-typo' : undefined}
+          onFoundEgg={onFoundEgg}
+        />
         <Stat label="BEST STREAK" value={`${stats.bestStreak}`} />
       </View>
 
@@ -78,13 +92,24 @@ export default function StatsScreen({ stats, gameLog }: { stats: GameStats; game
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  eggId,
+  onFoundEgg,
+}: {
+  label: string;
+  value: string;
+  eggId?: string;
+  onFoundEgg?: (id: string) => void;
+}) {
   const theme = useTheme();
   const styles = makeStyles(theme);
+  const labelText = <Text style={styles.statLabel}>{label}</Text>;
   return (
     <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      {eggId && onFoundEgg ? <EasterEgg id={eggId} onFound={onFoundEgg}>{labelText}</EasterEgg> : labelText}
     </View>
   );
 }

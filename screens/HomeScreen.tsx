@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppLogo from '../components/AppLogo';
 import DesignTypeGlyph from '../components/DesignTypeGlyph';
 import AvatarIcon from '../components/AvatarIcon';
+import EasterEgg from '../components/EasterEgg';
 import LawIcon from '../components/LawIcon';
 import LawExample from '../components/LawExample';
 import ResourceFlashcard from '../components/ResourceFlashcard';
@@ -29,12 +30,14 @@ export default function HomeScreen({
   recentItems,
   onSelectResource,
   onSelectGame,
+  onFoundEgg,
 }: {
   profile: Profile;
   stats: GameStats;
   recentItems: RecentItem[];
   onSelectResource: (item: Resource) => void;
   onSelectGame: (id: GameId) => void;
+  onFoundEgg: (id: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -51,7 +54,7 @@ export default function HomeScreen({
         contentContainerStyle={{ paddingTop: insets.top + space.screenTopInset, paddingBottom: insets.bottom + space.space24 }}
       >
         <View style={styles.topRow}>
-          <AppLogo />
+          <AppLogo onFoundEgg={onFoundEgg} />
           <View style={styles.topRowRight}>
             <Pressable onPress={() => setSearchOpen(true)} hitSlop={8}>
               <SearchIcon size={22} color={theme.fg} />
@@ -61,7 +64,9 @@ export default function HomeScreen({
         </View>
 
         <View style={styles.quoteCard}>
-          <Text style={styles.quoteEyebrow}>TODAY'S THOUGHT</Text>
+          <EasterEgg id="quote-eyebrow" onFound={onFoundEgg}>
+            <Text style={styles.quoteEyebrow}>TODAY'S THOUGHt</Text>
+          </EasterEgg>
           <Text style={styles.quoteText}>{quote}</Text>
         </View>
 

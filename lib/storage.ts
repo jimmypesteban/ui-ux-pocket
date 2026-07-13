@@ -122,3 +122,32 @@ export async function pushRecentItem(item: RecentItem): Promise<RecentItem[]> {
   await AsyncStorage.setItem(RECENT_ITEMS_KEY, JSON.stringify(updated));
   return updated;
 }
+
+const ACTIVE_MS_KEY = 'ui-ux-pocket:totalActiveMs';
+
+export async function loadActiveMs(): Promise<number> {
+  const raw = await AsyncStorage.getItem(ACTIVE_MS_KEY);
+  return raw ? Number(raw) : 0;
+}
+
+export async function addActiveMs(deltaMs: number): Promise<number> {
+  const current = await loadActiveMs();
+  const updated = current + Math.max(0, deltaMs);
+  await AsyncStorage.setItem(ACTIVE_MS_KEY, String(updated));
+  return updated;
+}
+
+const FOUND_EGGS_KEY = 'ui-ux-pocket:foundEggs';
+
+export async function loadFoundEggs(): Promise<string[]> {
+  const raw = await AsyncStorage.getItem(FOUND_EGGS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export async function markEggFound(id: string): Promise<string[]> {
+  const current = await loadFoundEggs();
+  if (current.includes(id)) return current;
+  const updated = [...current, id];
+  await AsyncStorage.setItem(FOUND_EGGS_KEY, JSON.stringify(updated));
+  return updated;
+}

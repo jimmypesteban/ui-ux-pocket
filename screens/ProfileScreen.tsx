@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MotiView } from 'moti';
 import StatsScreen from './StatsScreen';
 import HistoryScreen from './HistoryScreen';
+import AchievementsScreen from './AchievementsScreen';
 import SettingsScreen from './SettingsScreen';
 import AnimatedPressable from '../components/AnimatedPressable';
 import AvatarIcon from '../components/AvatarIcon';
@@ -12,11 +13,14 @@ import { Theme, useTheme } from '../lib/theme';
 import { GameLogEntry, GameStats } from '../lib/types';
 import { space, radius, border } from '../lib/tokens';
 
-type SubTab = 'stats' | 'log' | 'settings';
+type SubTab = 'stats' | 'badges' | 'log' | 'settings';
 
 export default function ProfileScreen({
   stats,
   gameLog,
+  totalActiveMs,
+  foundEggCount,
+  onFoundEgg,
   avatarId,
   notificationsEnabled,
   reminderHour,
@@ -27,6 +31,9 @@ export default function ProfileScreen({
 }: {
   stats: GameStats;
   gameLog: GameLogEntry[];
+  totalActiveMs: number;
+  foundEggCount: number;
+  onFoundEgg: (id: string) => void;
   avatarId: AvatarId;
   notificationsEnabled: boolean;
   reminderHour: number;
@@ -48,11 +55,15 @@ export default function ProfileScreen({
       </View>
       <View style={styles.subTabRow}>
         <SubTabButton label="STATS" active={subTab === 'stats'} onPress={() => setSubTab('stats')} styles={styles} />
+        <SubTabButton label="BADGES" active={subTab === 'badges'} onPress={() => setSubTab('badges')} styles={styles} />
         <SubTabButton label="LOG" active={subTab === 'log'} onPress={() => setSubTab('log')} styles={styles} />
         <SubTabButton label="SETTINGS" active={subTab === 'settings'} onPress={() => setSubTab('settings')} styles={styles} />
       </View>
       <MotiView key={subTab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
-        {subTab === 'stats' && <StatsScreen stats={stats} gameLog={gameLog} />}
+        {subTab === 'stats' && <StatsScreen stats={stats} gameLog={gameLog} onFoundEgg={onFoundEgg} />}
+        {subTab === 'badges' && (
+          <AchievementsScreen stats={stats} gameLog={gameLog} totalActiveMs={totalActiveMs} foundEggCount={foundEggCount} />
+        )}
         {subTab === 'log' && <HistoryScreen stats={stats} gameLog={gameLog} />}
         {subTab === 'settings' && (
           <SettingsScreen

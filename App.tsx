@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MotiView } from 'moti';
@@ -39,6 +39,10 @@ import {
   loadRecentItems,
   pushRecentItem,
   RecentItem,
+  loadActiveMs,
+  addActiveMs,
+  loadFoundEggs,
+  markEggFound,
 } from './lib/storage';
 import { pickTodaysChallenge } from './lib/challengePicker';
 import { recordAnswer } from './lib/gameLogic';
@@ -92,6 +96,9 @@ function RootScreen() {
   const [gameLog, setGameLog] = useState<GameLogEntry[]>([]);
   const [lawsJump, setLawsJump] = useState<{ collectionKey: string; index: number; nonce: number } | null>(null);
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
+  const [totalActiveMs, setTotalActiveMs] = useState(0);
+  const [foundEggs, setFoundEggs] = useState<string[]>([]);
+  const activeMsRef = useRef({ lastTick: 0, isActive: true });
 
   useEffect(() => {
     Promise.all([
@@ -108,7 +115,9 @@ function RootScreen() {
       loadNotificationsEnabled(),
       loadGameLog(),
       loadRecentItems(),
-    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log, recent]) => {
+      loadActiveMs(),
+      loadFoundEggs(),
+    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log, recent, activeMs, eggs]) => {
       setProfile(p);
       setStats(s);
       setColorBest(cb);
@@ -122,10 +131,44 @@ function RootScreen() {
       setNotificationsEnabled(ne);
       setGameLog(log);
       setRecentItems(recent);
+      setTotalActiveMs(activeMs);
+      setFoundEggs(eggs);
       setView(p ? 'main' : 'quiz');
       if (p && ne) ensureDailyReminderScheduled(rh);
     });
   }, []);
+
+  useEffect(() => {
+    activeMsRef.current.lastTick = Date.now();
+
+    const flush = async () => {
+      if (!activeMsRef.current.isActive) return;
+      const now = Date.now();
+      const delta = now - activeMsRef.current.lastTick;
+      activeMsRef.current.lastTick = now;
+      if (delta > 0) {
+        const updated = await addActiveMs(delta);
+        setTotalActiveMs(updated);
+      }
+    };
+
+    const interval = setInterval(flush, 20000);
+    const subscription = AppState.addEventListener('change', (state) => {
+      flush();
+      activeMsRef.current.isActive = state === 'active';
+      activeMsRef.current.lastTick = Date.now();
+    });
+
+    return () => {
+      clearInterval(interval);
+      subscription.remove();
+    };
+  }, []);
+
+  async function handleFoundEgg(id: string) {
+    const updated = await markEggFound(id);
+    setFoundEggs(updated);
+  }
 
   async function logGame(game: GameLogEntry['game'], score: number, maxScore: number) {
     const updated = await appendGameLogEntry({ game, date: todayKey(), score, maxScore });
@@ -354,6 +397,7 @@ function RootScreen() {
         bestScore={centerBest}
         onFinish={handleCenterGameFinish}
         onBack={() => setView('main')}
+        onFoundEgg={handleFoundEgg}
       />
     );
   }
@@ -382,6 +426,7 @@ function RootScreen() {
             recentItems={recentItems}
             onSelectResource={handleSelectResource}
             onSelectGame={goToGame}
+            onFoundEgg={handleFoundEgg}
           />
         )}
         {tab === 'games' && (
@@ -404,12 +449,21 @@ function RootScreen() {
             onPlayTypeOrderGame={() => goToGame('typeorder')}
           />
         )}
-        {tab === 'laws' && <LawsScreen jumpTarget={lawsJump} onViewResource={handleViewResource} />}
+        {tab === 'laws' && (
+          <LawsScreen
+            jumpTarget={lawsJump}
+            onViewResource={handleViewResource}
+            onFoundEgg={handleFoundEgg}
+          />
+        )}
         {tab === 'explore' && <TypesScreen yourType={profile.designTypeId} />}
         {tab === 'profile' && (
           <ProfileScreen
             stats={stats}
             gameLog={gameLog}
+            totalActiveMs={totalActiveMs}
+            foundEggCount={foundEggs.length}
+            onFoundEgg={handleFoundEgg}
             avatarId={profile.avatarId}
             notificationsEnabled={notificationsEnabled}
             reminderHour={reminderHour}
