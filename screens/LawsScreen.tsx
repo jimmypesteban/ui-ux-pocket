@@ -7,8 +7,9 @@ import CollectionIcon, { CollectionIconId } from '../components/CollectionIcon';
 import EasterEgg from '../components/EasterEgg';
 import LawIcon from '../components/LawIcon';
 import LawExample from '../components/LawExample';
+import BookmarkIcon from '../components/BookmarkIcon';
 import { Theme, useTheme } from '../lib/theme';
-import { ALL_COLLECTIONS } from '../lib/collections';
+import { ALL_COLLECTIONS, ALL_RESOURCES, collectionFor } from '../lib/collections';
 import { ReadingRef, Resource, ResourceCollection } from '../lib/resources';
 import { border, radius, space } from '../lib/tokens';
 
@@ -29,16 +30,21 @@ function readingLabel(ref: ReadingRef): string {
 type Nav =
   | { mode: 'menu' }
   | { mode: 'grid'; collectionKey: string }
+  | { mode: 'favorites' }
   | { mode: 'detail'; collectionKey: string; index: number };
 
 export default function LawsScreen({
   jumpTarget,
   onViewResource,
   onFoundEgg,
+  favoriteIds,
+  onToggleFavorite,
 }: {
   jumpTarget?: { collectionKey: string; index: number; nonce: number } | null;
   onViewResource?: (item: Resource) => void;
   onFoundEgg?: (id: string) => void;
+  favoriteIds: string[];
+  onToggleFavorite: (id: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -51,7 +57,14 @@ export default function LawsScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jumpTarget?.nonce]);
 
-  const collection = view.mode !== 'menu' ? ALL_COLLECTIONS.find((c: ResourceCollection) => c.key === view.collectionKey) ?? null : null;
+  const collection = view.mode === 'grid' || view.mode === 'detail' ? ALL_COLLECTIONS.find((c: ResourceCollection) => c.key === view.collectionKey) ?? null : null;
+  const favoriteResources = ALL_RESOURCES.filter((r) => favoriteIds.includes(r.id));
+
+  function openResource(item: Resource) {
+    const home = collectionFor(item);
+    if (!home) return;
+    setView({ mode: 'detail', collectionKey: home.key, index: home.items.indexOf(item) });
+  }
 
   return (
     <ScrollView
@@ -65,6 +78,13 @@ export default function LawsScreen({
       {view.mode === 'menu' && (
         <View style={styles.menuContainer}>
           <Text style={styles.title}>Laws & Principles</Text>
+          <AnimatedPressable style={styles.menuCard} onPress={() => setView({ mode: 'favorites' })}>
+            <CollectionIcon id="saved" size={36} color={theme.fg} />
+            <Text style={styles.menuCardTitle}>Saved</Text>
+            <Text style={styles.menuCardAttribution}>
+              {favoriteResources.length === 0 ? 'Nothing saved yet' : `${favoriteResources.length} item${favoriteResources.length === 1 ? '' : 's'}`}
+            </Text>
+          </AnimatedPressable>
           {ALL_COLLECTIONS.map((c) => (
             <AnimatedPressable
               key={c.key}
@@ -86,6 +106,25 @@ export default function LawsScreen({
             )}
           </View>
         </View>
+      )}
+
+      {view.mode === 'favorites' && (
+        <>
+          <Breadcrumbs items={[{ label: 'Laws & Principles', onPress: () => setView({ mode: 'menu' }) }, { label: 'Saved' }]} />
+          <Text style={styles.eyebrow}>SAVED</Text>
+          {favoriteResources.length === 0 ? (
+            <Text style={styles.attribution}>Tap the bookmark on any item to save it here.</Text>
+          ) : (
+            <View style={styles.grid}>
+              {favoriteResources.map((item) => (
+                <AnimatedPressable key={item.id} style={styles.cell} onPress={() => openResource(item)}>
+                  <LawIcon id={item.id} size={30} color={theme.fg} />
+                  <Text style={styles.cellName}>{item.name}</Text>
+                </AnimatedPressable>
+              ))}
+            </View>
+          )}
+        </>
       )}
 
       {view.mode === 'grid' && collection && (
@@ -121,6 +160,8 @@ export default function LawsScreen({
           onGoToMenu={() => setView({ mode: 'menu' })}
           onGoToGrid={() => setView({ mode: 'grid', collectionKey: collection.key })}
           onViewResource={onViewResource}
+          favoriteIds={favoriteIds}
+          onToggleFavorite={onToggleFavorite}
           styles={styles}
           theme={theme}
         />
@@ -136,6 +177,8 @@ function ResourceDetail({
   onGoToMenu,
   onGoToGrid,
   onViewResource,
+  favoriteIds,
+  onToggleFavorite,
   styles,
   theme,
 }: {
@@ -145,6 +188,8 @@ function ResourceDetail({
   onGoToMenu: () => void;
   onGoToGrid: () => void;
   onViewResource?: (item: Resource) => void;
+  favoriteIds: string[];
+  onToggleFavorite: (id: string) => void;
   styles: ReturnType<typeof makeStyles>;
   theme: Theme;
 }) {
@@ -153,6 +198,7 @@ function ResourceDetail({
   const item = items[index];
   const prevIndex = (index - 1 + items.length) % items.length;
   const nextIndex = (index + 1) % items.length;
+  const isFavorite = favoriteIds.includes(item.id);
 
   useEffect(() => {
     onViewResource?.(item);
@@ -161,12 +207,17 @@ function ResourceDetail({
 
   return (
     <View>
-      <Breadcrumbs
-        items={[
-          { label: 'Laws & Principles', onPress: onGoToMenu },
-          { label: collection.breadcrumbLabel, onPress: onGoToGrid },
-        ]}
-      />
+      <View style={styles.breadcrumbRow}>
+        <Breadcrumbs
+          items={[
+            { label: 'Laws & Principles', onPress: onGoToMenu },
+            { label: collection.breadcrumbLabel, onPress: onGoToGrid },
+          ]}
+        />
+        <Pressable onPress={() => onToggleFavorite(item.id)} hitSlop={8}>
+          <BookmarkIcon filled={isFavorite} size={20} color={theme.fg} />
+        </Pressable>
+      </View>
 
       <Pressable style={styles.jumpToggle} onPress={() => setJumpOpen((o) => !o)}>
         <Text style={styles.jumpToggleText}>Jump to…</Text>
@@ -246,6 +297,7 @@ function makeStyles(theme: Theme) {
     container: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: space.screenPadding },
     title: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 30, marginBottom: space.space20 },
     menuContainer: { flex: 1 },
+    breadcrumbRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
     menuCard: {
       borderWidth: border.hairline,
       borderColor: theme.border,

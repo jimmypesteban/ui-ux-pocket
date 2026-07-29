@@ -151,3 +151,17 @@ export async function markEggFound(id: string): Promise<string[]> {
   await AsyncStorage.setItem(FOUND_EGGS_KEY, JSON.stringify(updated));
   return updated;
 }
+
+const FAVORITE_RESOURCES_KEY = 'ui-ux-pocket:favoriteResources';
+
+export async function loadFavoriteResourceIds(): Promise<string[]> {
+  const raw = await AsyncStorage.getItem(FAVORITE_RESOURCES_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export async function toggleFavoriteResource(id: string): Promise<string[]> {
+  const current = await loadFavoriteResourceIds();
+  const updated = current.includes(id) ? current.filter((existing) => existing !== id) : [...current, id];
+  await AsyncStorage.setItem(FAVORITE_RESOURCES_KEY, JSON.stringify(updated));
+  return updated;
+}

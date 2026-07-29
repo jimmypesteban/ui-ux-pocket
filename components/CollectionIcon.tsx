@@ -1,6 +1,6 @@
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 
-export type CollectionIconId = 'laws' | 'heuristics' | 'processes' | 'product' | 'biases' | 'artifacts';
+export type CollectionIconId = 'laws' | 'heuristics' | 'processes' | 'product' | 'biases' | 'artifacts' | 'research' | 'saved';
 
 function content(id: CollectionIconId, color: string) {
   switch (id) {
@@ -77,6 +77,28 @@ function content(id: CollectionIconId, color: string) {
           <Line x1={9} y1={13} x2={22} y2={13} stroke={color} strokeWidth={2} />
           <Line x1={9} y1={18} x2={27} y2={18} stroke={color} strokeWidth={2} />
         </>
+      );
+
+    case 'research':
+      // a magnifying glass over an observed data point — watching real behavior
+      return (
+        <>
+          <Circle cx={20} cy={20} r={14} stroke={color} strokeWidth={2.5} fill="none" />
+          <Line x1={30} y1={30} x2={42} y2={42} stroke={color} strokeWidth={2.5} strokeLinecap="round" />
+          <Circle cx={20} cy={20} r={4} fill={color} opacity={0.5} />
+        </>
+      );
+
+    case 'saved':
+      // a bookmark — set this aside for later
+      return (
+        <Path
+          d="M12 6H36C37.1046 6 38 6.89543 38 8V42L24 34L10 42V8C10 6.89543 10.8954 6 12 6Z"
+          stroke={color}
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+          fill="none"
+        />
       );
   }
 }

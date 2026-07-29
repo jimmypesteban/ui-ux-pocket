@@ -106,6 +106,18 @@ export const DESIGN_PROCESSES: Resource[] = [
       { label: 'Morse, A. — The Art of Critique (medium.com).', url: 'https://medium.com/@adamdmorse/the-art-of-critique-3e455cd1cdba' },
     ],
   },
+  {
+    id: 'whiteboarding',
+    name: 'Whiteboarding',
+    tagline: 'The fastest way to think out loud in front of other people.',
+    explanation:
+      'Quick, disposable sketching and diagramming on a shared surface — a real whiteboard or its digital equivalent — used to externalize thinking before committing to a polished tool. The point is speed and shared visibility, not a keepable artifact; nobody critiques a whiteboard sketch\'s pixel alignment.',
+    origins:
+      "A long design-studio sketching tradition formalized as a facilitation staple by consultancies like IDEO from the 1990s onward, and later adapted into the tech industry's 'whiteboard challenge' design-interview format through the 2010s as a fast way to observe how a candidate actually thinks.",
+    furtherReading: [
+      { label: 'Interaction Design Foundation, Sketching and Prototyping (interaction-design.org).', url: 'https://www.interaction-design.org/literature/topics/sketching' },
+    ],
+  },
 ];
 
 const SOURCE_URL = 'https://www.designcouncil.org.uk/our-resources/the-double-diamond/';

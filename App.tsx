@@ -43,11 +43,14 @@ import {
   addActiveMs,
   loadFoundEggs,
   markEggFound,
+  loadFavoriteResourceIds,
+  toggleFavoriteResource,
 } from './lib/storage';
 import { pickTodaysChallenge } from './lib/challengePicker';
 import { recordAnswer } from './lib/gameLogic';
 import { todayKey } from './lib/date';
 import { ensureDailyReminderScheduled, cancelDailyReminder } from './lib/notifications';
+import DigitalRainLoader from './components/DigitalRainLoader';
 import OnboardingQuiz from './screens/OnboardingQuiz';
 import HomeScreen from './screens/HomeScreen';
 import GameScreen from './screens/GameScreen';
@@ -98,7 +101,14 @@ function RootScreen() {
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
   const [totalActiveMs, setTotalActiveMs] = useState(0);
   const [foundEggs, setFoundEggs] = useState<string[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
   const activeMsRef = useRef({ lastTick: 0, isActive: true });
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMinLoadTimeElapsed(true), 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -117,7 +127,8 @@ function RootScreen() {
       loadRecentItems(),
       loadActiveMs(),
       loadFoundEggs(),
-    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log, recent, activeMs, eggs]) => {
+      loadFavoriteResourceIds(),
+    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log, recent, activeMs, eggs, favorites]) => {
       setProfile(p);
       setStats(s);
       setColorBest(cb);
@@ -133,6 +144,7 @@ function RootScreen() {
       setRecentItems(recent);
       setTotalActiveMs(activeMs);
       setFoundEggs(eggs);
+      setFavoriteIds(favorites);
       setView(p ? 'main' : 'quiz');
       if (p && ne) ensureDailyReminderScheduled(rh);
     });
@@ -168,6 +180,11 @@ function RootScreen() {
   async function handleFoundEgg(id: string) {
     const updated = await markEggFound(id);
     setFoundEggs(updated);
+  }
+
+  async function handleToggleFavorite(id: string) {
+    const updated = await toggleFavoriteResource(id);
+    setFavoriteIds(updated);
   }
 
   async function logGame(game: GameLogEntry['game'], score: number, maxScore: number) {
@@ -323,12 +340,16 @@ function RootScreen() {
     setProfile(updated);
   }
 
-  if (view === 'loading' || !stats) {
-    return <View style={[styles.container, { backgroundColor: theme.bg }]} />;
+  if (view === 'loading' || !stats || !minLoadTimeElapsed) {
+    return <DigitalRainLoader />;
   }
 
   if (view === 'quiz') {
-    return <OnboardingQuiz onComplete={handleQuizComplete} />;
+    return (
+      <MotiView key="quiz" style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 220 }}>
+        <OnboardingQuiz onComplete={handleQuizComplete} />
+      </MotiView>
+    );
   }
 
   if (view === 'game' && activeChallenge) {
@@ -454,6 +475,8 @@ function RootScreen() {
             jumpTarget={lawsJump}
             onViewResource={handleViewResource}
             onFoundEgg={handleFoundEgg}
+            favoriteIds={favoriteIds}
+            onToggleFavorite={handleToggleFavorite}
           />
         )}
         {tab === 'explore' && <TypesScreen yourType={profile.designTypeId} />}

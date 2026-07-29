@@ -3,7 +3,7 @@ import Svg, { Path } from 'react-native-svg';
 import { Theme, useTheme } from '../lib/theme';
 import { space } from '../lib/tokens';
 
-function LogoMark({ size, color }: { size: number; color: string }) {
+export function LogoMark({ size, color }: { size: number; color: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 22 22" fill="none">
       <Path
