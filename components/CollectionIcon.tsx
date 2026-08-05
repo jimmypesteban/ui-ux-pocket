@@ -1,6 +1,6 @@
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 
-export type CollectionIconId = 'laws' | 'heuristics' | 'processes' | 'product' | 'biases' | 'artifacts' | 'research' | 'saved';
+export type CollectionIconId = 'laws' | 'heuristics' | 'processes' | 'product' | 'biases' | 'artifacts' | 'research' | 'saved' | 'interview';
 
 function content(id: CollectionIconId, color: string) {
   switch (id) {
@@ -99,6 +99,22 @@ function content(id: CollectionIconId, color: string) {
           strokeLinejoin="round"
           fill="none"
         />
+      );
+
+    case 'interview':
+      // a speech bubble asking the question — the interview itself
+      return (
+        <>
+          <Path
+            d="M8 8H40C41.1046 8 42 8.89543 42 10V30C42 31.1046 41.1046 32 40 32H24L14 42V32H8C6.89543 32 6 31.1046 6 30V10C6 8.89543 6.89543 8 8 8Z"
+            stroke={color}
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <Path d="M18 17 C18 13 22 12 24 12 C27 12 30 14 30 17 C30 20 25 20 25 24" stroke={color} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <Circle cx={25} cy={29} r={1.8} fill={color} />
+        </>
       );
   }
 }

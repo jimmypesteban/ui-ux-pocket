@@ -367,6 +367,7 @@ function content(id: string, color: string) {
       );
 
     case 'von-restorff-effect':
+    case 'innovation-vs-established-patterns':
       // the one that looks different is the one you remember
       return (
         <>
@@ -611,6 +612,8 @@ function content(id: string, color: string) {
       );
 
     case 'usability-testing':
+    case 'scrappy-user-research':
+    case 'usability-testing-time-constrained':
       // watching a real person move through a real task
       return (
         <>
@@ -714,6 +717,7 @@ function content(id: string, color: string) {
       );
 
     case 'product-market-fit':
+    case 'why-this-startup':
       // two shapes that were made for each other
       return (
         <>
@@ -922,6 +926,7 @@ function content(id: string, color: string) {
       );
 
     case 'component-library':
+    case 'design-tool-stack':
       // one spec, reused everywhere — never rebuilt slightly differently
       return (
         <>
@@ -1131,6 +1136,7 @@ function content(id: string, color: string) {
       );
 
     case 'user-interviews':
+    case 'engineer-collaboration-design-debt':
       // a real conversation, not a form to fill out
       return (
         <>
@@ -1144,6 +1150,9 @@ function content(id: string, color: string) {
       );
 
     case 'product-analytics':
+    case 'onboarding-drop-off-diagnosis':
+    case 'measuring-design-success':
+    case 'influencing-product-strategy':
       // real usage at scale — a trend line over a narrowing funnel
       return (
         <>
@@ -1165,6 +1174,149 @@ function content(id: string, color: string) {
           <Rect x={150} y={38} width={60} height={24} rx={3} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
           <Path d="M40 82 Q60 70 80 82 T120 82" stroke={color} strokeWidth={STROKE / 1.5} fill="none" {...dim} />
           <Path d="M150 82 H210" stroke={color} strokeWidth={STROKE / 1.5} {...dim} />
+        </>
+      );
+
+    // --- Interview Prep -----------------------------------------------
+
+    case 'portfolio-walkthrough':
+      // the before, the decision, and the number that proves it
+      return (
+        <>
+          <Rect x={20} y={20} width={80} height={60} rx={3} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Line x1={35} y1={45} x2={85} y2={45} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={35} y1={60} x2={70} y2={60} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Path d="M112 50 L150 50" stroke={color} strokeWidth={STROKE} />
+          <Path d="M143 42 L153 50 L143 58" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Rect x={165} y={20} width={80} height={60} rx={3} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M180 45 L188 53 L202 34" stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Line x1={180} y1={65} x2={225} y2={65} stroke={color} strokeWidth={STROKE} />
+        </>
+      );
+
+    case 'design-process-tight-timelines':
+    case 'mvp-limited-data':
+    case 'design-system-early-stage':
+    case 'design-to-dev-handoff':
+      // a clean sequence of steps, each one feeding the next
+      return (
+        <>
+          {[0, 1, 2].map((i) => (
+            <Fragment key={i}>
+              <Rect x={25 + i * 80} y={45} width={50} height={30} rx={4} stroke={color} strokeWidth={STROKE} fill="none" opacity={i === 2 ? 1 : 0.5 + i * 0.15} />
+              {i < 2 && <Path d={`M${75 + i * 80} 60 L${105 + i * 80} 60`} stroke={color} strokeWidth={STROKE} />}
+              {i < 2 && <Path d={`M${98 + i * 80} 52 L${108 + i * 80} 60 L${98 + i * 80} 68`} stroke={color} strokeWidth={STROKE} fill="none" />}
+            </Fragment>
+          ))}
+        </>
+      );
+
+    case 'accessible-fast-roadmap':
+      // built into the system once, not re-decided every sprint
+      return (
+        <>
+          <Rect x={20} y={25} width={90} height={70} rx={4} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Circle cx={65} cy={60} r={16} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M57 60 L63 66 L74 52" stroke={color} strokeWidth={STROKE} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M135 60 L160 60" stroke={color} strokeWidth={STROKE} {...dim} />
+          {[0, 1, 2].map((i) => (
+            <Rect key={i} x={175 + i * 22} y={30 + i * 5} width={16} height={16} rx={3} stroke={color} strokeWidth={STROKE} fill="none" opacity={0.4 + i * 0.25} />
+          ))}
+        </>
+      );
+
+    case 'conflicting-stakeholder-feedback':
+    case 'data-vs-user-feedback':
+      // two opposing pulls, resolved by one shared measure
+      return (
+        <>
+          <Path d="M30 35 L90 55" stroke={color} strokeWidth={STROKE} {...dim} />
+          <Path d="M30 85 L90 65" stroke={color} strokeWidth={STROKE} />
+          <Circle cx={30} cy={35} r={7} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Circle cx={30} cy={85} r={7} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Circle cx={110} cy={60} r={12} fill={color} />
+          <Path d="M132 60 L200 60" stroke={color} strokeWidth={STROKE} strokeDasharray="5 6" />
+        </>
+      );
+
+    case 'ambiguous-problem-statements':
+    case 'onboarding-competitive-audit':
+      // a fog of maybes narrowed to one testable guess
+      return (
+        <>
+          {[[30, 30], [55, 45], [40, 65], [65, 25], [75, 60]].map(([x, y], i) => (
+            <Circle key={i} cx={x} cy={y} r={9} stroke={color} strokeWidth={STROKE} fill="none" opacity={0.25} />
+          ))}
+          <Path d="M105 55 L145 55" stroke={color} strokeWidth={STROKE} />
+          <Path d="M138 47 L148 55 L138 63" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Circle cx={195} cy={55} r={16} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Circle cx={195} cy={55} r={4} fill={color} />
+        </>
+      );
+
+    case 'wearing-multiple-hats':
+      // one person, several roles, still one clear priority
+      return (
+        <>
+          <Circle cx={70} cy={55} r={16} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M50 95 Q70 70 90 95" stroke={color} strokeWidth={STROKE} fill="none" />
+          {[[130, 25], [160, 22], [190, 30]].map(([x, y], i) => (
+            <Rect key={i} x={x} y={y} width={20} height={14} rx={3} stroke={color} strokeWidth={STROKE} fill="none" opacity={i === 0 ? 1 : 0.35} />
+          ))}
+        </>
+      );
+
+    case 'learning-from-a-design-miss':
+      // a wrong turn, caught, and corrected
+      return (
+        <>
+          <Path d="M20 40 L90 40 L90 80 L150 80" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Circle cx={90} cy={80} r={6} fill={color} />
+          <Path d="M150 80 L150 40 L225 40" stroke={color} strokeWidth={STROKE} fill="none" strokeDasharray="6 6" />
+          <Path d="M215 32 L228 40 L215 48" stroke={color} strokeWidth={STROKE} fill="none" />
+        </>
+      );
+
+    case 'responsive-mobile-first':
+      // start narrow, decide what matters, then scale up
+      return (
+        <>
+          <Rect x={25} y={20} width={38} height={72} rx={6} stroke={color} strokeWidth={STROKE} fill="none" />
+          <Line x1={35} y1={38} x2={53} y2={38} stroke={color} strokeWidth={STROKE} />
+          <Line x1={35} y1={50} x2={53} y2={50} stroke={color} strokeWidth={STROKE} />
+          <Path d="M85 55 L120 55" stroke={color} strokeWidth={STROKE} />
+          <Path d="M113 47 L123 55 L113 63" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Rect x={140} y={20} width={100} height={72} rx={4} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Line x1={155} y1={38} x2={225} y2={38} stroke={color} strokeWidth={STROKE} {...dim} />
+          <Line x1={155} y1={50} x2={200} y2={50} stroke={color} strokeWidth={STROKE} {...dim} />
+        </>
+      );
+
+    case 'pivot-momentum-morale':
+      // the direction changes; the team keeps moving together
+      return (
+        <>
+          <Path d="M30 80 Q90 90 130 60" stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M130 60 Q170 35 225 35" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Path d="M215 27 L228 35 L215 43" stroke={color} strokeWidth={STROKE} fill="none" />
+          <Circle cx={30} cy={80} r={6} fill={color} />
+          <Circle cx={130} cy={60} r={6} fill={color} />
+        </>
+      );
+
+    case 'staying-current-with-trends':
+      // notice everything sweeping past, keep only what earns its place
+      return (
+        <>
+          <Circle cx={70} cy={60} r={40} stroke={color} strokeWidth={STROKE} fill="none" {...dim} />
+          <Path d="M70 60 L70 24" stroke={color} strokeWidth={STROKE} />
+          {[0, 1, 2, 3, 4].map((i) => {
+            const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+            const x = 70 + Math.cos(angle) * 40;
+            const y = 60 + Math.sin(angle) * 40;
+            return <Circle key={i} cx={x} cy={y} r={4} fill={color} opacity={i === 0 ? 1 : 0.3} />;
+          })}
+          <Path d="M150 60 L235 60" stroke={color} strokeWidth={STROKE} strokeDasharray="5 6" {...dim} />
         </>
       );
 

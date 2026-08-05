@@ -5,6 +5,7 @@ import { PRODUCT_COLLECTION } from './productThinking';
 import { BIASES_COLLECTION } from './cognitiveBiases';
 import { ARTIFACTS_COLLECTION } from './designArtifacts';
 import { RESEARCH_COLLECTION } from './researchMethods';
+import { INTERVIEW_COLLECTION } from './interviewPrep';
 import { Resource, ResourceCollection } from './resources';
 
 // Single registry of every resource collection in the app. Add a new
@@ -20,6 +21,7 @@ export const ALL_COLLECTIONS: ResourceCollection[] = [
   BIASES_COLLECTION,
   ARTIFACTS_COLLECTION,
   RESEARCH_COLLECTION,
+  INTERVIEW_COLLECTION,
 ];
 
 const collectionByItem = new Map<Resource, ResourceCollection>();
