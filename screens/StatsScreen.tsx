@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import AnimatedBar from '../components/AnimatedBar';
 import EasterEgg from '../components/EasterEgg';
+import { ALL_RESOURCES } from '../lib/collections';
 import { categoryBreakdown, gameLogBreakdown } from '../lib/gameLogic';
 import { GAME_LABELS, OTHER_GAME_ORDER } from '../lib/gameMeta';
 import { Theme, useTheme } from '../lib/theme';
@@ -20,10 +21,12 @@ export default function StatsScreen({
   stats,
   gameLog,
   onFoundEgg,
+  viewedResourceCount,
 }: {
   stats: GameStats;
   gameLog: GameLogEntry[];
   onFoundEgg?: (id: string) => void;
+  viewedResourceCount?: number;
 }) {
   const theme = useTheme();
   const styles = makeStyles(theme);
@@ -31,6 +34,8 @@ export default function StatsScreen({
   const byGame = gameLogBreakdown(gameLog);
   const overallAccuracy =
     stats.totalPlayed > 0 ? Math.round((stats.totalCorrect / stats.totalPlayed) * 100) : null;
+  const totalResources = ALL_RESOURCES.length;
+  const libraryPct = totalResources > 0 ? Math.round(((viewedResourceCount ?? 0) / totalResources) * 100) : 0;
 
   return (
     <ScrollView
@@ -47,6 +52,19 @@ export default function StatsScreen({
           onFoundEgg={onFoundEgg}
         />
         <Stat label="BEST STREAK" value={`${stats.bestStreak}`} />
+      </View>
+
+      <View style={styles.divider} />
+
+      <Text style={styles.eyebrow}>LIBRARY</Text>
+      <View style={styles.catRow}>
+        <View style={styles.catHeader}>
+          <Text style={styles.catLabel}>RESOURCES READ</Text>
+          <Text style={styles.catValue}>{viewedResourceCount ?? 0} / {totalResources}</Text>
+        </View>
+        <View style={styles.barTrack}>
+          <AnimatedBar pct={libraryPct} style={styles.barFill} />
+        </View>
       </View>
 
       <View style={styles.divider} />

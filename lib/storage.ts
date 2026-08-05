@@ -165,3 +165,37 @@ export async function toggleFavoriteResource(id: string): Promise<string[]> {
   await AsyncStorage.setItem(FAVORITE_RESOURCES_KEY, JSON.stringify(updated));
   return updated;
 }
+
+const RESOURCE_NOTES_KEY = 'ui-ux-pocket:resourceNotes';
+
+export async function loadResourceNotes(): Promise<Record<string, string>> {
+  const raw = await AsyncStorage.getItem(RESOURCE_NOTES_KEY);
+  return raw ? JSON.parse(raw) : {};
+}
+
+export async function saveResourceNote(id: string, text: string): Promise<Record<string, string>> {
+  const current = await loadResourceNotes();
+  const updated = { ...current };
+  if (text.trim()) {
+    updated[id] = text;
+  } else {
+    delete updated[id];
+  }
+  await AsyncStorage.setItem(RESOURCE_NOTES_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+const VIEWED_RESOURCES_KEY = 'ui-ux-pocket:viewedResourceIds';
+
+export async function loadViewedResourceIds(): Promise<string[]> {
+  const raw = await AsyncStorage.getItem(VIEWED_RESOURCES_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export async function markResourceViewed(id: string): Promise<string[]> {
+  const current = await loadViewedResourceIds();
+  if (current.includes(id)) return current;
+  const updated = [...current, id];
+  await AsyncStorage.setItem(VIEWED_RESOURCES_KEY, JSON.stringify(updated));
+  return updated;
+}

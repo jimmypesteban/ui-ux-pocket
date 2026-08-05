@@ -45,6 +45,10 @@ import {
   markEggFound,
   loadFavoriteResourceIds,
   toggleFavoriteResource,
+  loadResourceNotes,
+  saveResourceNote,
+  loadViewedResourceIds,
+  markResourceViewed,
 } from './lib/storage';
 import { pickTodaysChallenge } from './lib/challengePicker';
 import { recordAnswer } from './lib/gameLogic';
@@ -102,6 +106,8 @@ function RootScreen() {
   const [totalActiveMs, setTotalActiveMs] = useState(0);
   const [foundEggs, setFoundEggs] = useState<string[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [resourceNotes, setResourceNotes] = useState<Record<string, string>>({});
+  const [viewedResourceIds, setViewedResourceIds] = useState<string[]>([]);
   const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
   const activeMsRef = useRef({ lastTick: 0, isActive: true });
 
@@ -128,7 +134,9 @@ function RootScreen() {
       loadActiveMs(),
       loadFoundEggs(),
       loadFavoriteResourceIds(),
-    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log, recent, activeMs, eggs, favorites]) => {
+      loadResourceNotes(),
+      loadViewedResourceIds(),
+    ]).then(([p, s, cb, kb, ab, keb, pmb, ceb, tob, rh, ne, log, recent, activeMs, eggs, favorites, notes, viewed]) => {
       setProfile(p);
       setStats(s);
       setColorBest(cb);
@@ -145,6 +153,8 @@ function RootScreen() {
       setTotalActiveMs(activeMs);
       setFoundEggs(eggs);
       setFavoriteIds(favorites);
+      setResourceNotes(notes);
+      setViewedResourceIds(viewed);
       setView(p ? 'main' : 'quiz');
       if (p && ne) ensureDailyReminderScheduled(rh);
     });
@@ -221,6 +231,12 @@ function RootScreen() {
 
   function handleViewResource(item: Resource) {
     recordRecent({ kind: 'resource', id: item.id });
+    markResourceViewed(item.id).then(setViewedResourceIds);
+  }
+
+  async function handleSaveNote(id: string, text: string) {
+    const updated = await saveResourceNote(id, text);
+    setResourceNotes(updated);
   }
 
   const GAME_VIEW_BY_ID: Partial<Record<GameId, Screen>> = {
@@ -477,6 +493,8 @@ function RootScreen() {
             onFoundEgg={handleFoundEgg}
             favoriteIds={favoriteIds}
             onToggleFavorite={handleToggleFavorite}
+            resourceNotes={resourceNotes}
+            onSaveNote={handleSaveNote}
           />
         )}
         {tab === 'explore' && <TypesScreen yourType={profile.designTypeId} />}
@@ -486,6 +504,7 @@ function RootScreen() {
             gameLog={gameLog}
             totalActiveMs={totalActiveMs}
             foundEggCount={foundEggs.length}
+            viewedResourceCount={viewedResourceIds.length}
             onFoundEgg={handleFoundEgg}
             avatarId={profile.avatarId}
             notificationsEnabled={notificationsEnabled}

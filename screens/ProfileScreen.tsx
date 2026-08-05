@@ -20,6 +20,7 @@ export default function ProfileScreen({
   gameLog,
   totalActiveMs,
   foundEggCount,
+  viewedResourceCount,
   onFoundEgg,
   avatarId,
   notificationsEnabled,
@@ -33,6 +34,7 @@ export default function ProfileScreen({
   gameLog: GameLogEntry[];
   totalActiveMs: number;
   foundEggCount: number;
+  viewedResourceCount: number;
   onFoundEgg: (id: string) => void;
   avatarId: AvatarId;
   notificationsEnabled: boolean;
@@ -60,7 +62,9 @@ export default function ProfileScreen({
         <SubTabButton label="SETTINGS" active={subTab === 'settings'} onPress={() => setSubTab('settings')} styles={styles} />
       </View>
       <MotiView key={subTab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
-        {subTab === 'stats' && <StatsScreen stats={stats} gameLog={gameLog} onFoundEgg={onFoundEgg} />}
+        {subTab === 'stats' && (
+          <StatsScreen stats={stats} gameLog={gameLog} onFoundEgg={onFoundEgg} viewedResourceCount={viewedResourceCount} />
+        )}
         {subTab === 'badges' && (
           <AchievementsScreen stats={stats} gameLog={gameLog} totalActiveMs={totalActiveMs} foundEggCount={foundEggCount} />
         )}

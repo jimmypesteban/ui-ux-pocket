@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from '../components/AnimatedPressable';
 import Breadcrumbs from '../components/Breadcrumbs';
@@ -8,6 +8,7 @@ import EasterEgg from '../components/EasterEgg';
 import LawIcon from '../components/LawIcon';
 import LawExample from '../components/LawExample';
 import BookmarkIcon from '../components/BookmarkIcon';
+import InterviewPracticeScreen from './InterviewPracticeScreen';
 import { Theme, useTheme } from '../lib/theme';
 import { ALL_COLLECTIONS, ALL_RESOURCES, collectionFor } from '../lib/collections';
 import { ReadingRef, Resource, ResourceCollection } from '../lib/resources';
@@ -31,7 +32,8 @@ type Nav =
   | { mode: 'menu' }
   | { mode: 'grid'; collectionKey: string }
   | { mode: 'favorites' }
-  | { mode: 'detail'; collectionKey: string; index: number };
+  | { mode: 'detail'; collectionKey: string; index: number }
+  | { mode: 'practice'; collectionKey: string };
 
 export default function LawsScreen({
   jumpTarget,
@@ -39,12 +41,16 @@ export default function LawsScreen({
   onFoundEgg,
   favoriteIds,
   onToggleFavorite,
+  resourceNotes,
+  onSaveNote,
 }: {
   jumpTarget?: { collectionKey: string; index: number; nonce: number } | null;
   onViewResource?: (item: Resource) => void;
   onFoundEgg?: (id: string) => void;
   favoriteIds: string[];
   onToggleFavorite: (id: string) => void;
+  resourceNotes: Record<string, string>;
+  onSaveNote: (id: string, text: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -57,13 +63,20 @@ export default function LawsScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jumpTarget?.nonce]);
 
-  const collection = view.mode === 'grid' || view.mode === 'detail' ? ALL_COLLECTIONS.find((c: ResourceCollection) => c.key === view.collectionKey) ?? null : null;
+  const collection =
+    view.mode === 'grid' || view.mode === 'detail' || view.mode === 'practice'
+      ? ALL_COLLECTIONS.find((c: ResourceCollection) => c.key === view.collectionKey) ?? null
+      : null;
   const favoriteResources = ALL_RESOURCES.filter((r) => favoriteIds.includes(r.id));
 
   function openResource(item: Resource) {
     const home = collectionFor(item);
     if (!home) return;
     setView({ mode: 'detail', collectionKey: home.key, index: home.items.indexOf(item) });
+  }
+
+  if (view.mode === 'practice' && collection) {
+    return <InterviewPracticeScreen collection={collection} onExit={() => setView({ mode: 'grid', collectionKey: collection.key })} />;
   }
 
   return (
@@ -136,6 +149,12 @@ export default function LawsScreen({
             ]}
           />
           <Text style={styles.eyebrow}>{collection.title}</Text>
+          {collection.key === 'interview' && (
+            <AnimatedPressable style={styles.practiceButton} onPress={() => setView({ mode: 'practice', collectionKey: collection.key })}>
+              <CollectionIcon id="interview" size={20} color={theme.fg} />
+              <Text style={styles.practiceButtonText}>START PRACTICE SESSION</Text>
+            </AnimatedPressable>
+          )}
           <View style={styles.grid}>
             {collection.items.map((item, i) => (
               <AnimatedPressable
@@ -162,6 +181,8 @@ export default function LawsScreen({
           onViewResource={onViewResource}
           favoriteIds={favoriteIds}
           onToggleFavorite={onToggleFavorite}
+          resourceNotes={resourceNotes}
+          onSaveNote={onSaveNote}
           styles={styles}
           theme={theme}
         />
@@ -179,6 +200,8 @@ function ResourceDetail({
   onViewResource,
   favoriteIds,
   onToggleFavorite,
+  resourceNotes,
+  onSaveNote,
   styles,
   theme,
 }: {
@@ -190,6 +213,8 @@ function ResourceDetail({
   onViewResource?: (item: Resource) => void;
   favoriteIds: string[];
   onToggleFavorite: (id: string) => void;
+  resourceNotes: Record<string, string>;
+  onSaveNote: (id: string, text: string) => void;
   styles: ReturnType<typeof makeStyles>;
   theme: Theme;
 }) {
@@ -199,6 +224,12 @@ function ResourceDetail({
   const prevIndex = (index - 1 + items.length) % items.length;
   const nextIndex = (index + 1) % items.length;
   const isFavorite = favoriteIds.includes(item.id);
+  const [noteText, setNoteText] = useState(resourceNotes[item.id] ?? '');
+
+  useEffect(() => {
+    setNoteText(resourceNotes[item.id] ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.id]);
 
   useEffect(() => {
     onViewResource?.(item);
@@ -266,6 +297,20 @@ function ResourceDetail({
         ))}
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>YOUR NOTES</Text>
+        <TextInput
+          style={styles.noteInput}
+          value={noteText}
+          onChangeText={setNoteText}
+          onBlur={() => onSaveNote(item.id, noteText)}
+          placeholder="Write your own answer or takeaway…"
+          placeholderTextColor={theme.fgFaint}
+          multiline
+          textAlignVertical="top"
+        />
+      </View>
+
       <View style={styles.divider} />
 
       <View style={styles.pagerRow}>
@@ -324,6 +369,18 @@ function makeStyles(theme: Theme) {
     comingSoonText: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 0.5 },
 
     eyebrow: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 12, letterSpacing: 2, marginBottom: space.space20 },
+    practiceButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: space.rowGap,
+      borderWidth: border.hairline,
+      borderColor: theme.fg,
+      borderRadius: radius.card,
+      paddingVertical: space.space16,
+      marginBottom: space.sectionGap,
+    },
+    practiceButtonText: { color: theme.fg, fontFamily: theme.monoFont, fontSize: 13, letterSpacing: 1 },
     grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.space16 },
     cell: {
       width: '48%',
@@ -399,6 +456,16 @@ function makeStyles(theme: Theme) {
     sectionBody: { color: theme.fgDim, fontSize: 15, lineHeight: 22 },
     readingItem: { color: theme.fgDim, fontSize: 14, lineHeight: 21, marginBottom: space.space8 },
     readingItemLink: { textDecorationLine: 'underline' },
+    noteInput: {
+      borderWidth: border.hairline,
+      borderColor: theme.border,
+      borderRadius: radius.card,
+      padding: space.space16,
+      minHeight: 90,
+      color: theme.fg,
+      fontSize: 15,
+      lineHeight: 22,
+    },
     divider: { height: 1, backgroundColor: theme.border, marginTop: space.sectionGap },
     pagerRow: { flexDirection: 'row', marginTop: space.space20, gap: space.space12 },
     pagerCell: { flex: 1 },
