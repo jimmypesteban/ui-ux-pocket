@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import AnimatedPressable from './AnimatedPressable';
 import { OptionSpec } from '../lib/types';
@@ -22,7 +23,7 @@ export default function JudgmentOption({
   revealed: boolean;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
     <AnimatedPressable
       onPress={onPress}

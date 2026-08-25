@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MotiView } from 'moti';
@@ -11,10 +11,10 @@ import { border, space } from '../lib/tokens';
 
 type SubTab = 'types' | 'pairs';
 
-export default function TypesScreen({ yourType }: { yourType: DesignTypeId }) {
+function TypesScreen({ yourType }: { yourType: DesignTypeId }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [subTab, setSubTab] = useState<SubTab>('types');
 
   return (
@@ -69,3 +69,5 @@ function makeStyles(theme: Theme) {
     content: { flex: 1 },
   });
 }
+
+export default memo(TypesScreen);

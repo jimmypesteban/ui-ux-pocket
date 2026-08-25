@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CHALLENGES } from '../lib/dailyGames';
 import { GAME_LABELS } from '../lib/gameMeta';
@@ -11,7 +12,7 @@ type CombinedEntry =
 
 export default function HistoryScreen({ stats, gameLog }: { stats: GameStats; gameLog: GameLogEntry[] }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   const judgmentEntries: CombinedEntry[] = stats.history.map((h) => ({
     kind: 'judgment',

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import AchievementBadge from '../components/AchievementBadge';
 import { ACHIEVEMENTS, AchievementCategory, computeUnlockedIds, progressFor } from '../lib/achievements';
@@ -26,7 +27,7 @@ export default function AchievementsScreen({
   foundEggCount: number;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const ctx = { stats, gameLog, totalActiveMs, foundEggCount };
   const unlocked = computeUnlockedIds(ctx);
   const unlockedCount = ACHIEVEMENTS.filter((a) => unlocked.has(a.id)).length;

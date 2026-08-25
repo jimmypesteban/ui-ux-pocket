@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from './AnimatedPressable';
@@ -14,10 +15,10 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'profile', label: 'PROFILE' },
 ];
 
-export default function TabBar({ active, onChange }: { active: TabKey; onChange: (tab: TabKey) => void }) {
+function TabBar({ active, onChange }: { active: TabKey; onChange: (tab: TabKey) => void }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom + space.space8 }]}>
       {TABS.map((tab) => (
@@ -45,3 +46,5 @@ function makeStyles(theme: Theme) {
     dot: { width: 3, height: 3, borderRadius: 2, backgroundColor: theme.fg },
   });
 }
+
+export default memo(TabBar);

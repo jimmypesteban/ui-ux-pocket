@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import DesignTypeGlyph from '../components/DesignTypeGlyph';
 import { DESIGN_TYPES } from '../lib/designTypes';
@@ -8,7 +9,7 @@ import { border, space } from '../lib/tokens';
 
 export default function PairingsScreen({ yourType }: { yourType: DesignTypeId }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const others = otherTypes(yourType);
 
   return (

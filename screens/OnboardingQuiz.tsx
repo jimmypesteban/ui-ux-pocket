@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QUIZ_QUESTIONS } from '../lib/quiz';
@@ -11,7 +11,7 @@ import { border, radius, space } from '../lib/tokens';
 export default function OnboardingQuiz({ onComplete }: { onComplete: (profile: Profile) => void }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [index, setIndex] = useState(0);
   const [orderScore, setOrderScore] = useState(0);
   const [intensityScore, setIntensityScore] = useState(0);

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import DesignTypeGlyph from '../components/DesignTypeGlyph';
 import { DESIGN_TYPES } from '../lib/designTypes';
@@ -18,7 +19,7 @@ const ORDER: DesignTypeId[] = [
 
 export default function ExploreScreen({ yourType }: { yourType: DesignTypeId }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
     <ScrollView
       style={styles.container}

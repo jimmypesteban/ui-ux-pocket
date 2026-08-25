@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from '../components/AnimatedPressable';
@@ -33,7 +33,7 @@ export default function InterviewPracticeScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [phase, setPhase] = useState<Phase>('intro');
   const [order, setOrder] = useState<number[]>([]);
   const [position, setPosition] = useState(0);

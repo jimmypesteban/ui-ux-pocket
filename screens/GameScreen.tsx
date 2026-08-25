@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { JudgmentChallenge } from '../lib/types';
@@ -18,7 +18,7 @@ export default function GameScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [chosen, setChosen] = useState<'A' | 'B' | null>(null);
 
   function choose(letter: 'A' | 'B') {

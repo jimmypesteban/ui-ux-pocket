@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Theme, useTheme } from '../lib/theme';
 import { Resource } from '../lib/resources';
@@ -38,7 +38,7 @@ export default function ResourceFlashcard({
   onExit?: () => void;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [order, setOrder] = useState<number[]>(() => items.map((_, i) => i));
   const [position, setPosition] = useState(initialIndex);
   const [flipped, setFlipped] = useState(false);

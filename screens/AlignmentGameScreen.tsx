@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlignmentRound, generateAlignmentRound, scoreRound, verdictForAlignmentScore } from '../lib/alignmentGame';
@@ -23,7 +23,7 @@ export default function AlignmentGameScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [phase, setPhase] = useState<Phase>('intro');
   const [rounds, setRounds] = useState<AlignmentRound[]>([]);
   const [scores, setScores] = useState<number[]>([]);

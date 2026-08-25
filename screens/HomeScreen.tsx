@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppLogo from '../components/AppLogo';
@@ -24,7 +24,7 @@ function todaysResourceIndex(): number {
   return dayNumber % ALL_RESOURCES.length;
 }
 
-export default function HomeScreen({
+function HomeScreen({
   profile,
   stats,
   recentItems,
@@ -41,7 +41,7 @@ export default function HomeScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const designType = DESIGN_TYPES[profile.designTypeId];
   const accuracy = stats.totalPlayed > 0 ? Math.round((stats.totalCorrect / stats.totalPlayed) * 100) : null;
   const quote = quoteForToday();
@@ -118,7 +118,7 @@ export default function HomeScreen({
 
 function Stat({ label, value }: { label: string; value: string }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
     <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>
@@ -153,3 +153,5 @@ function makeStyles(theme: Theme) {
     statLabel: { color: theme.fgFaint, fontFamily: theme.monoFont, fontSize: 11, letterSpacing: 1, marginTop: space.space4 },
   });
 }
+
+export default memo(HomeScreen);

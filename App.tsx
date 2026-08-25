@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -83,6 +83,16 @@ type Screen =
   | 'pixelmatchgame'
   | 'centergame'
   | 'typeordergame';
+
+const GAME_VIEW_BY_ID: Partial<Record<GameId, Screen>> = {
+  color: 'colorgame',
+  contrast: 'contrastgame',
+  alignment: 'alignmentgame',
+  kerning: 'kerninggame',
+  pixelmatch: 'pixelmatchgame',
+  center: 'centergame',
+  typeorder: 'typeordergame',
+};
 
 function RootScreen() {
   const theme = useTheme();
@@ -187,25 +197,25 @@ function RootScreen() {
     };
   }, []);
 
-  async function handleFoundEgg(id: string) {
+  const handleFoundEgg = useCallback(async (id: string) => {
     const updated = await markEggFound(id);
     setFoundEggs(updated);
-  }
+  }, []);
 
-  async function handleToggleFavorite(id: string) {
+  const handleToggleFavorite = useCallback(async (id: string) => {
     const updated = await toggleFavoriteResource(id);
     setFavoriteIds(updated);
-  }
+  }, []);
 
   async function logGame(game: GameLogEntry['game'], score: number, maxScore: number) {
     const updated = await appendGameLogEntry({ game, date: todayKey(), score, maxScore });
     setGameLog(updated);
   }
 
-  async function recordRecent(item: RecentItem) {
+  const recordRecent = useCallback(async (item: RecentItem) => {
     const updated = await pushRecentItem(item);
     setRecentItems(updated);
-  }
+  }, []);
 
   async function handleQuizComplete(newProfile: Profile) {
     await saveProfile(newProfile);
@@ -215,49 +225,60 @@ function RootScreen() {
     ensureDailyReminderScheduled();
   }
 
-  function handlePlay() {
+  const handlePlay = useCallback(() => {
     if (!stats) return;
     setActiveChallenge(pickTodaysChallenge(stats));
     setView('game');
-  }
+  }, [stats]);
 
-  function handleSelectResource(item: Resource) {
+  const handleSelectResource = useCallback((item: Resource) => {
     const collection = collectionFor(item);
     if (!collection) return;
     const index = collection.items.indexOf(item);
     setLawsJump((prev) => ({ collectionKey: collection.key, index, nonce: (prev?.nonce ?? 0) + 1 }));
     setTab('laws');
-  }
+  }, []);
 
-  function handleViewResource(item: Resource) {
-    recordRecent({ kind: 'resource', id: item.id });
-    markResourceViewed(item.id).then(setViewedResourceIds);
-  }
+  const handleViewResource = useCallback(
+    (item: Resource) => {
+      recordRecent({ kind: 'resource', id: item.id });
+      markResourceViewed(item.id).then(setViewedResourceIds);
+    },
+    [recordRecent],
+  );
 
-  async function handleSaveNote(id: string, text: string) {
+  const handleSaveNote = useCallback(async (id: string, text: string) => {
     const updated = await saveResourceNote(id, text);
     setResourceNotes(updated);
-  }
+  }, []);
 
-  const GAME_VIEW_BY_ID: Partial<Record<GameId, Screen>> = {
-    color: 'colorgame',
-    contrast: 'contrastgame',
-    alignment: 'alignmentgame',
-    kerning: 'kerninggame',
-    pixelmatch: 'pixelmatchgame',
-    center: 'centergame',
-    typeorder: 'typeordergame',
-  };
+  const goToGame = useCallback(
+    (id: GameId) => {
+      recordRecent({ kind: 'game', id });
+      if (id === 'judgment') {
+        handlePlay();
+        return;
+      }
+      const target = GAME_VIEW_BY_ID[id];
+      if (target) setView(target);
+    },
+    [recordRecent, handlePlay],
+  );
 
-  function goToGame(id: GameId) {
-    recordRecent({ kind: 'game', id });
-    if (id === 'judgment') {
-      handlePlay();
-      return;
-    }
-    const target = GAME_VIEW_BY_ID[id];
-    if (target) setView(target);
-  }
+  // Stable per-game callbacks so GamesScreen's memo isn't defeated by inline arrows.
+  const playGame = useMemo(
+    () => ({
+      judgment: () => goToGame('judgment'),
+      color: () => goToGame('color'),
+      contrast: () => goToGame('contrast'),
+      alignment: () => goToGame('alignment'),
+      kerning: () => goToGame('kerning'),
+      pixelmatch: () => goToGame('pixelmatch'),
+      center: () => goToGame('center'),
+      typeorder: () => goToGame('typeorder'),
+    }),
+    [goToGame],
+  );
 
   async function handleGameFinish(chosen: 'A' | 'B', wasCorrect: boolean) {
     if (!stats || !activeChallenge) return;
@@ -324,37 +345,46 @@ function RootScreen() {
     }
   }
 
-  async function handleRetakeQuiz() {
+  const handleRetakeQuiz = useCallback(async () => {
     await clearProfile();
     await cancelDailyReminder();
     setProfile(null);
     setView('quiz');
-  }
+  }, []);
 
-  async function handleToggleNotifications(enabled: boolean) {
-    setNotificationsEnabled(enabled);
-    await saveNotificationsEnabled(enabled);
-    if (enabled) {
-      await ensureDailyReminderScheduled(reminderHour);
-    } else {
-      await cancelDailyReminder();
-    }
-  }
+  const handleToggleNotifications = useCallback(
+    async (enabled: boolean) => {
+      setNotificationsEnabled(enabled);
+      await saveNotificationsEnabled(enabled);
+      if (enabled) {
+        await ensureDailyReminderScheduled(reminderHour);
+      } else {
+        await cancelDailyReminder();
+      }
+    },
+    [reminderHour],
+  );
 
-  async function handleChangeReminderHour(hour: number) {
-    setReminderHour(hour);
-    await saveReminderHour(hour);
-    if (notificationsEnabled) {
-      await ensureDailyReminderScheduled(hour);
-    }
-  }
+  const handleChangeReminderHour = useCallback(
+    async (hour: number) => {
+      setReminderHour(hour);
+      await saveReminderHour(hour);
+      if (notificationsEnabled) {
+        await ensureDailyReminderScheduled(hour);
+      }
+    },
+    [notificationsEnabled],
+  );
 
-  async function handleChangeAvatar(avatarId: AvatarId) {
-    if (!profile) return;
-    const updated = { ...profile, avatarId };
-    await saveProfile(updated);
-    setProfile(updated);
-  }
+  const handleChangeAvatar = useCallback(
+    async (avatarId: AvatarId) => {
+      if (!profile) return;
+      const updated = { ...profile, avatarId };
+      await saveProfile(updated);
+      setProfile(updated);
+    },
+    [profile],
+  );
 
   if (view === 'loading' || !stats || !minLoadTimeElapsed) {
     return <DigitalRainLoader />;
@@ -476,14 +506,14 @@ function RootScreen() {
             pixelMatchBest={pixelMatchBest}
             centerBest={centerBest}
             typeOrderBest={typeOrderBest}
-            onPlay={() => goToGame('judgment')}
-            onPlayColorGame={() => goToGame('color')}
-            onPlayContrastGame={() => goToGame('contrast')}
-            onPlayAlignmentGame={() => goToGame('alignment')}
-            onPlayKerningGame={() => goToGame('kerning')}
-            onPlayPixelMatchGame={() => goToGame('pixelmatch')}
-            onPlayCenterGame={() => goToGame('center')}
-            onPlayTypeOrderGame={() => goToGame('typeorder')}
+            onPlay={playGame.judgment}
+            onPlayColorGame={playGame.color}
+            onPlayContrastGame={playGame.contrast}
+            onPlayAlignmentGame={playGame.alignment}
+            onPlayKerningGame={playGame.kerning}
+            onPlayPixelMatchGame={playGame.pixelmatch}
+            onPlayCenterGame={playGame.center}
+            onPlayTypeOrderGame={playGame.typeorder}
           />
         )}
         {tab === 'laws' && (

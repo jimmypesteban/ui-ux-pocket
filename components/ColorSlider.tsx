@@ -21,7 +21,7 @@ export default function ColorSlider({
   hideValue?: boolean;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const trackRef = useRef<View>(null);
   const trackWidthRef = useRef(0);
   const trackPageXRef = useRef(0);

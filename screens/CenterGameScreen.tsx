@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CenterRound, generateCenterRound, offsetDistance, verdictForCenterScore } from '../lib/centerGame';
@@ -24,7 +24,7 @@ export default function CenterGameScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [phase, setPhase] = useState<Phase>('intro');
   const [rounds, setRounds] = useState<CenterRound[]>([]);
   const [answers, setAnswers] = useState<boolean[]>([]);

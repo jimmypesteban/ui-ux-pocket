@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from '../components/AnimatedPressable';
@@ -7,7 +8,7 @@ import { GameStats } from '../lib/types';
 import { hasPlayedToday } from '../lib/challengePicker';
 import { border, radius, space } from '../lib/tokens';
 
-export default function GamesScreen({
+function GamesScreen({
   stats,
   colorBest,
   contrastBest,
@@ -44,7 +45,7 @@ export default function GamesScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const playedToday = hasPlayedToday(stats);
 
   return (
@@ -121,7 +122,7 @@ function GameRow({
   emphasized?: boolean;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
     <AnimatedPressable
       style={[styles.gameRow, emphasized && styles.gameRowEmphasized]}
@@ -157,3 +158,5 @@ function makeStyles(theme: Theme) {
     gameSubtitle: { color: theme.fgFaint, fontSize: 13, marginTop: space.space6 },
   });
 }
+
+export default memo(GamesScreen);

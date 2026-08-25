@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import AnimatedPressable from '../components/AnimatedPressable';
 import ColorSlider from '../components/ColorSlider';
@@ -30,7 +31,7 @@ export default function SettingsScreen({
   onRetakeQuiz: () => void;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const { mode, toggleMode } = useThemeMode();
 
   return (

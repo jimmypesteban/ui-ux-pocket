@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from '../components/AnimatedPressable';
@@ -35,7 +35,7 @@ type Nav =
   | { mode: 'detail'; collectionKey: string; index: number }
   | { mode: 'practice'; collectionKey: string };
 
-export default function LawsScreen({
+function LawsScreen({
   jumpTarget,
   onViewResource,
   onFoundEgg,
@@ -54,7 +54,7 @@ export default function LawsScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [view, setView] = useState<Nav>({ mode: 'menu' });
 
   useEffect(() => {
@@ -478,3 +478,5 @@ function makeStyles(theme: Theme) {
     pagerNameRight: { textAlign: 'right' },
   });
 }
+
+export default memo(LawsScreen);

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import AchievementIcon from './AchievementIcon';
 import AnimatedBar from './AnimatedBar';
@@ -24,7 +25,7 @@ export default function AchievementBadge({
   progress: Progress | null;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const pct = progress && progress.target > 0 ? Math.round((progress.current / progress.target) * 100) : null;
   const hasLevel = progress?.level !== undefined && progress?.maxLevel !== undefined;
 

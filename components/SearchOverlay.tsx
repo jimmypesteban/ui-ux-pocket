@@ -41,7 +41,7 @@ export default function SearchOverlay({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [query, setQuery] = useState('');
 
   const hits = useMemo(() => {

@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { Theme, useTheme } from '../lib/theme';
 import { space } from '../lib/tokens';
@@ -7,7 +7,7 @@ export type Crumb = { label: string; onPress?: () => void };
 
 export default function Breadcrumbs({ items }: { items: Crumb[] }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   return (
     <Text style={styles.row}>

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import AnimatedBar from '../components/AnimatedBar';
 import EasterEgg from '../components/EasterEgg';
@@ -29,7 +30,7 @@ export default function StatsScreen({
   viewedResourceCount?: number;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const breakdown = categoryBreakdown(stats);
   const byGame = gameLogBreakdown(gameLog);
   const overallAccuracy =
@@ -122,7 +123,7 @@ function Stat({
   onFoundEgg?: (id: string) => void;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const labelText = <Text style={styles.statLabel}>{label}</Text>;
   return (
     <View style={styles.stat}>

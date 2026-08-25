@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ColorSlider from '../components/ColorSlider';
@@ -29,7 +29,7 @@ export default function ContrastGameScreen({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [phase, setPhase] = useState<Phase>('intro');
   const [rounds, setRounds] = useState<ContrastRound[]>([]);
   const [guess, setGuess] = useState(10);

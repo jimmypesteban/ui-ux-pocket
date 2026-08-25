@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Theme, useTheme } from '../lib/theme';
@@ -24,7 +25,7 @@ export default function AppLogo({
   onFoundEgg?: (id: string) => void;
 }) {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
     <View style={styles.row}>
       <LogoMark size={size} color={theme.fg} />
