@@ -1,7 +1,7 @@
 import { memo, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MotiView } from 'moti';
+import FadeIn from '../components/FadeIn';
 import ExploreScreen from './ExploreScreen';
 import PairingsScreen from './PairingsScreen';
 import AnimatedPressable from '../components/AnimatedPressable';
@@ -24,10 +24,10 @@ function TypesScreen({ yourType }: { yourType: DesignTypeId }) {
         <SubTabButton label="TYPES" active={subTab === 'types'} onPress={() => setSubTab('types')} styles={styles} />
         <SubTabButton label="PAIRS" active={subTab === 'pairs'} onPress={() => setSubTab('pairs')} styles={styles} />
       </View>
-      <MotiView key={subTab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
+      <FadeIn key={subTab} style={styles.content}>
         {subTab === 'types' && <ExploreScreen yourType={yourType} />}
         {subTab === 'pairs' && <PairingsScreen yourType={yourType} />}
-      </MotiView>
+      </FadeIn>
     </View>
   );
 }

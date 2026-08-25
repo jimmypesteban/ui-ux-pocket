@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MotiView } from 'moti';
+import FadeIn from '../components/FadeIn';
 import StatsScreen from './StatsScreen';
 import HistoryScreen from './HistoryScreen';
 import AchievementsScreen from './AchievementsScreen';
@@ -61,7 +61,7 @@ export default function ProfileScreen({
         <SubTabButton label="LOG" active={subTab === 'log'} onPress={() => setSubTab('log')} styles={styles} />
         <SubTabButton label="SETTINGS" active={subTab === 'settings'} onPress={() => setSubTab('settings')} styles={styles} />
       </View>
-      <MotiView key={subTab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
+      <FadeIn key={subTab} style={styles.content}>
         {subTab === 'stats' && (
           <StatsScreen stats={stats} gameLog={gameLog} onFoundEgg={onFoundEgg} viewedResourceCount={viewedResourceCount} />
         )}
@@ -80,7 +80,7 @@ export default function ProfileScreen({
             onRetakeQuiz={onRetakeQuiz}
           />
         )}
-      </MotiView>
+      </FadeIn>
     </View>
   );
 }

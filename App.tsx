@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { MotiView } from 'moti';
+import FadeIn from './components/FadeIn';
 
 import { useTheme, useThemeMode } from './lib/theme';
 import ThemeProvider from './lib/ThemeProvider';
@@ -392,9 +392,9 @@ function RootScreen() {
 
   if (view === 'quiz') {
     return (
-      <MotiView key="quiz" style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 220 }}>
+      <FadeIn key="quiz" style={styles.content} duration={220}>
         <OnboardingQuiz onComplete={handleQuizComplete} />
-      </MotiView>
+      </FadeIn>
     );
   }
 
@@ -485,7 +485,7 @@ function RootScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
-      <MotiView key={tab} style={styles.content} from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'timing', duration: 160 }}>
+      <FadeIn key={tab} style={styles.content}>
         {tab === 'home' && (
           <HomeScreen
             profile={profile}
@@ -545,7 +545,7 @@ function RootScreen() {
             onRetakeQuiz={handleRetakeQuiz}
           />
         )}
-      </MotiView>
+      </FadeIn>
       <TabBar active={tab} onChange={setTab} />
     </View>
   );
