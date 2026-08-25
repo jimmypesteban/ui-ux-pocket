@@ -1,6 +1,6 @@
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 
-export type CollectionIconId = 'laws' | 'heuristics' | 'processes' | 'product' | 'biases' | 'artifacts' | 'research' | 'saved' | 'interview';
+export type CollectionIconId = 'laws' | 'heuristics' | 'processes' | 'product' | 'biases' | 'artifacts' | 'research' | 'saved' | 'notes' | 'interview';
 
 function content(id: CollectionIconId, color: string) {
   switch (id) {
@@ -99,6 +99,31 @@ function content(id: CollectionIconId, color: string) {
           strokeLinejoin="round"
           fill="none"
         />
+      );
+
+    case 'notes':
+      // a page with a pencil — what you wrote down yourself
+      return (
+        <>
+          <Path
+            d="M34 6H10C8.89543 6 8 6.89543 8 8V40C8 41.1046 8.89543 42 10 42H32C33.1046 42 34 41.1046 34 40V26"
+            stroke={color}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <Line x1={15} y1={17} x2={27} y2={17} stroke={color} strokeWidth={2.5} strokeLinecap="round" />
+          <Line x1={15} y1={25} x2={24} y2={25} stroke={color} strokeWidth={2.5} strokeLinecap="round" opacity={0.55} />
+          <Line x1={15} y1={33} x2={27} y2={33} stroke={color} strokeWidth={2.5} strokeLinecap="round" opacity={0.55} />
+          <Path
+            d="M40.5 6.5 A3.5 3.5 0 0 1 40.5 11.5 L31 21 L26 22.5 L27.5 17.5 Z"
+            stroke={color}
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </>
       );
 
     case 'interview':

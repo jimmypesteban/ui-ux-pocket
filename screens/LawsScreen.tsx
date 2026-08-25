@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AnimatedPressable from '../components/AnimatedPressable';
@@ -32,6 +32,7 @@ type Nav =
   | { mode: 'menu' }
   | { mode: 'grid'; collectionKey: string }
   | { mode: 'favorites' }
+  | { mode: 'notes' }
   | { mode: 'detail'; collectionKey: string; index: number }
   | { mode: 'practice'; collectionKey: string };
 
@@ -68,6 +69,7 @@ function LawsScreen({
       ? ALL_COLLECTIONS.find((c: ResourceCollection) => c.key === view.collectionKey) ?? null
       : null;
   const favoriteResources = ALL_RESOURCES.filter((r) => favoriteIds.includes(r.id));
+  const annotatedResources = ALL_RESOURCES.filter((r) => (resourceNotes[r.id] ?? '').trim().length > 0);
 
   function openResource(item: Resource) {
     const home = collectionFor(item);
@@ -96,6 +98,15 @@ function LawsScreen({
             <Text style={styles.menuCardTitle}>Saved</Text>
             <Text style={styles.menuCardAttribution}>
               {favoriteResources.length === 0 ? 'Nothing saved yet' : `${favoriteResources.length} item${favoriteResources.length === 1 ? '' : 's'}`}
+            </Text>
+          </AnimatedPressable>
+          <AnimatedPressable style={styles.menuCard} onPress={() => setView({ mode: 'notes' })}>
+            <CollectionIcon id="notes" size={36} color={theme.fg} />
+            <Text style={styles.menuCardTitle}>My Notes</Text>
+            <Text style={styles.menuCardAttribution}>
+              {annotatedResources.length === 0
+                ? 'Nothing written yet'
+                : `${annotatedResources.length} note${annotatedResources.length === 1 ? '' : 's'}`}
             </Text>
           </AnimatedPressable>
           {ALL_COLLECTIONS.map((c) => (
@@ -133,6 +144,33 @@ function LawsScreen({
                 <AnimatedPressable key={item.id} style={styles.cell} onPress={() => openResource(item)}>
                   <LawIcon id={item.id} size={30} color={theme.fg} />
                   <Text style={styles.cellName}>{item.name}</Text>
+                </AnimatedPressable>
+              ))}
+            </View>
+          )}
+        </>
+      )}
+
+      {view.mode === 'notes' && (
+        <>
+          <Breadcrumbs items={[{ label: 'Laws & Principles', onPress: () => setView({ mode: 'menu' }) }, { label: 'My Notes' }]} />
+          <Text style={styles.eyebrow}>MY NOTES</Text>
+          {annotatedResources.length === 0 ? (
+            <Text style={styles.attribution}>Write a note on any item and it will show up here.</Text>
+          ) : (
+            <View style={styles.noteList}>
+              {annotatedResources.map((item) => (
+                <AnimatedPressable key={item.id} style={styles.noteRow} onPress={() => openResource(item)}>
+                  <View style={styles.noteRowHeader}>
+                    <LawIcon id={item.id} size={22} color={theme.fg} />
+                    <View style={styles.noteRowTitles}>
+                      <Text style={styles.noteRowName}>{item.name}</Text>
+                      <Text style={styles.noteRowCollection}>{collectionFor(item)?.breadcrumbLabel}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.noteRowText} numberOfLines={3}>
+                    {resourceNotes[item.id].trim()}
+                  </Text>
                 </AnimatedPressable>
               ))}
             </View>
@@ -224,10 +262,52 @@ function ResourceDetail({
   const prevIndex = (index - 1 + items.length) % items.length;
   const nextIndex = (index + 1) % items.length;
   const isFavorite = favoriteIds.includes(item.id);
-  const [noteText, setNoteText] = useState(resourceNotes[item.id] ?? '');
+  // The draft carries the id it belongs to, so it can never be misread as the
+  // note for whatever item we paged to next. Keeping the two in one piece of
+  // state makes them change atomically — a separate id and text can briefly
+  // disagree on the commit where the item changes.
+  const [draft, setDraft] = useState({ id: item.id, text: resourceNotes[item.id] ?? '' });
+  const savedText = useRef(resourceNotes[item.id] ?? '');
+  const noteText = draft.id === item.id ? draft.text : resourceNotes[item.id] ?? '';
 
   useEffect(() => {
-    setNoteText(resourceNotes[item.id] ?? '');
+    const stored = resourceNotes[item.id] ?? '';
+    setDraft({ id: item.id, text: stored });
+    savedText.current = stored;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.id]);
+
+  function flushNote(id: string, text: string) {
+    if (text === savedText.current) return;
+    savedText.current = text;
+    onSaveNote(id, text);
+  }
+
+  // Autosave while typing. Saving only on blur loses the note whenever the
+  // field still has focus as the app is backgrounded or the screen unmounts.
+  const pendingNote = useRef<{ id: string; text: string } | null>(null);
+  useEffect(() => {
+    if (draft.id !== item.id || draft.text === savedText.current) return;
+    pendingNote.current = draft;
+    const timeout = setTimeout(() => {
+      flushNote(draft.id, draft.text);
+      pendingNote.current = null;
+    }, 600);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, item.id]);
+
+  // Paging to another item (or leaving the screen) mid-debounce would otherwise
+  // drop the edit, since the pending timer gets cleared before it fires.
+  useEffect(() => {
+    const leavingId = item.id;
+    return () => {
+      const pending = pendingNote.current;
+      if (pending && pending.id === leavingId) {
+        onSaveNote(pending.id, pending.text);
+        pendingNote.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.id]);
 
@@ -302,8 +382,8 @@ function ResourceDetail({
         <TextInput
           style={styles.noteInput}
           value={noteText}
-          onChangeText={setNoteText}
-          onBlur={() => onSaveNote(item.id, noteText)}
+          onChangeText={(text) => setDraft({ id: item.id, text })}
+          onBlur={() => flushNote(item.id, noteText)}
           placeholder="Write your own answer or takeaway…"
           placeholderTextColor={theme.fgFaint}
           multiline
@@ -397,6 +477,26 @@ function makeStyles(theme: Theme) {
     cellName: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 16, textAlign: 'center', lineHeight: 20 },
     attribution: { color: theme.fgFaint, fontSize: 11, textAlign: 'center', marginTop: space.space24 },
     attributionLink: { textDecorationLine: 'underline' },
+
+    noteList: { gap: space.space12 },
+    noteRow: {
+      borderWidth: border.hairline,
+      borderColor: theme.border,
+      borderRadius: radius.card,
+      padding: space.space16,
+      gap: space.space12,
+    },
+    noteRowHeader: { flexDirection: 'row', alignItems: 'center', gap: space.space12 },
+    noteRowTitles: { flex: 1 },
+    noteRowName: { color: theme.fg, fontFamily: theme.displayFont, fontSize: 17, lineHeight: 22 },
+    noteRowCollection: {
+      color: theme.fgFaint,
+      fontFamily: theme.monoFont,
+      fontSize: 10,
+      letterSpacing: 1,
+      marginTop: space.space4,
+    },
+    noteRowText: { color: theme.fgDim, fontSize: 14, lineHeight: 21 },
 
     jumpToggle: {
       flexDirection: 'row',
